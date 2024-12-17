@@ -1,0 +1,1 @@
+images should contain all your png, jpeg, and other visual resources

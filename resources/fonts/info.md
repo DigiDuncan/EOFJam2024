@@ -1,0 +1,1 @@
+fonts should contain all your ttf, ttc, otf, and otc files
