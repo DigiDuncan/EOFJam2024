@@ -3,7 +3,7 @@ from typing import Any, Protocol, TypeVar, TYPE_CHECKING
 
 from arcade import get_window as get_arcade_window
 if TYPE_CHECKING:
-    from template.core.application import Window
+    from eofjam.core.application import Window
 
 
 __all__ = (

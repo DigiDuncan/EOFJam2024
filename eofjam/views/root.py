@@ -1,4 +1,4 @@
-from template.core.application import View
+from eofjam.core.application import View
 
 
 class RootView(View):

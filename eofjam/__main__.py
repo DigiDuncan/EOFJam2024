@@ -2,7 +2,7 @@
 # nuitka-project: --force-stderr-spec=err.txt
 # nuitka-project: --report=compilation-report.xml
 # nuitka-project: --standalone
-# nuitka-project: --product-name="template"
+# nuitka-project: --product-name="eofjam"
 # nuitka-project: --product-version="0.0.0.0"
 # nuitka-project: --file-description=""
 # nuitka-project-if: {OS} == "Darwin":
@@ -12,7 +12,7 @@
 #   nuitka-project: --windows-console-mode=disable
 #   nuitka-project: --windows-icon-from-ico=icon.png
 
-from template.main import main
+from eofjam.main import main
 
 if __name__ == '__main__':
     main()

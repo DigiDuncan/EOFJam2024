@@ -1,5 +1,5 @@
-from template.core.application import Window
-from template.views.root import RootView
+from eofjam.core.application import Window
+from eofjam.views.root import RootView
 
 def main() -> None:
     win = Window()

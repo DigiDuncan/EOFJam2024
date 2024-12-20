@@ -1,4 +1,4 @@
-A Simple Template for Python Arcade Projects
+A Simple eofjam for Python Arcade Projects
 
 ## Includes:
 - A `core` submodule for game features
@@ -17,8 +17,8 @@ A Simple Template for Python Arcade Projects
 
 ## How to Use
 Download the included zip file with this release.
-Find and replace all references to `template` with your game's name.
-This includes: `pyproject.toml`, `template/main.py`, `template/__main__.py`,
-`template/views/root.py`, `template/views/TEMPLATE.py`, `template/lib/utils.py`,
-`template/libs/application.py`.
+Find and replace all references to `eofjam` with your game's name.
+This includes: `pyproject.toml`, `eofjam/main.py`, `eofjam/__main__.py`,
+`eofjam/views/root.py`, `eofjam/views/eofjam.py`, `eofjam/lib/utils.py`,
+`eofjam/libs/application.py`.
 Then, create your virtual environment and install the required modules using `pip install -I .[dev]`

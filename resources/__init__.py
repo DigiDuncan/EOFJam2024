@@ -40,7 +40,7 @@ __all__ = (
 
 # Shader methods
 read_shader = make_string_opener(shaders, 'glsl')
-
+get_shader_path = make_path_finder(shaders, 'glsl')
 
 def load_program(
         ctx: ArcadeContext,
@@ -51,7 +51,7 @@ def load_program(
         tess_control_shader: str | None = None,
         tess_evaluation_shader: str | None = None,
         sub_directories: tuple[str, ...] = (),
-        common: list[str] | None = None,
+        common: Iterable[str] = (),
         defines: dict[str, str] | None = None,
         varyings: Sequence[str] | None = None,
         varyings_capture_mode: str = "interleaved"
@@ -62,13 +62,13 @@ def load_program(
     Returns:
         an Arcade gl Program for use with gl Geometry.
     """
-    vertex = read_shader(vertex_shader, sub_directories)
-    fragment = None if fragment_shader is None else read_shader(fragment_shader, sub_directories)
-    geometry = None if geometry_shader is None else read_shader(geometry_shader, sub_directories)
-    tess_control = None if tess_control_shader is None else read_shader(tess_control_shader, sub_directories)
-    tess_evaluation = None if tess_evaluation_shader is None else read_shader(tess_evaluation_shader, sub_directories)
+    vertex = get_shader_path(vertex_shader, sub_directories)
+    fragment = None if fragment_shader is None else get_shader_path(fragment_shader, sub_directories)
+    geometry = None if geometry_shader is None else get_shader_path(geometry_shader, sub_directories)
+    tess_control = None if tess_control_shader is None else get_shader_path(tess_control_shader, sub_directories)
+    tess_evaluation = None if tess_evaluation_shader is None else get_shader_path(tess_evaluation_shader, sub_directories)
 
-    return ctx.program(
+    return ctx.load_program(
         vertex_shader=vertex,
         fragment_shader=fragment,
         geometry_shader=geometry,

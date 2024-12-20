@@ -1,5 +1,5 @@
 [project]
-name = "template"
+name = "eofjam"
 version = "0.0.1"
 description = ""
 readme = "README.md"
@@ -28,7 +28,7 @@ dev = [
 ]
 
 [project.scripts]
-template = "template.main:main"
+eofjam = "eofjam.main:main"
 
 [tool.rye]
 managed = true

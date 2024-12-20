@@ -1,6 +1,6 @@
-from template.core.application import View
+from eofjam.core.application import View
 
-class TEMPLATEView(View):
+class eofjamView(View):
 
     def __init__(self) -> None:
         super().__init__()

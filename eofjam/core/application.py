@@ -9,7 +9,7 @@ __all__ = (
 )
 
 WINDOW_WIDTH, WINDOW_HEIGHT = 1280,720
-WINDOW_TITLE = 'template'
+WINDOW_TITLE = 'eofjam'
 
 class Window(ArcadeWindow):
 
