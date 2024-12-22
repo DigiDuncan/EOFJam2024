@@ -8,7 +8,7 @@ __all__ = (
     'ArcadeView'
 )
 
-WINDOW_WIDTH, WINDOW_HEIGHT = 1280,720
+WINDOW_WIDTH, WINDOW_HEIGHT = 1280, 720
 WINDOW_TITLE = 'eofjam'
 
 class Window(ArcadeWindow):
