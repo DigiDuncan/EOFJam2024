@@ -2,6 +2,8 @@ import arcade
 from arcade import Sprite, SpriteCircle
 from arcade.types import Point2
 
+from eofjam.lib.collider import Collider
+
 class Entity:
     def __init__(self, position: Point2, sprite: Sprite, rotation: float = 0.0, scale: float = 1.0):
         self._position: Point2 = position
@@ -17,6 +19,10 @@ class Entity:
         self.strength: float = 1
         self.defense: float = 1
         self.speed: float = 400
+
+    @property
+    def hitbox(self) -> Collider:
+        return Collider(self.position, self.sprite.width / 2)
 
     @property
     def position(self) -> Point2:
@@ -42,7 +48,7 @@ class Entity:
 
     @scale.setter
     def scale(self, v: float) -> None:
-        self.sprite.scale = round(v, 3)
+        self.sprite.scale = round(v / 4, 3)
         self._scale = round(v, 3)
 
     def draw(self) -> None:
@@ -53,15 +59,6 @@ class Enemy(Entity):
         sprite = SpriteCircle(512, arcade.color.CHARM_PINK)
         super().__init__(position, sprite, rotation, scale)
 
-    @property
-    def scale(self) -> float:
-        return self._scale
-
-    @scale.setter
-    def scale(self, v: float) -> None:
-        self.sprite.scale = v / 4
-        self._scale = v
-
 class Player(Entity):
     def __init__(self, position: Point2, rotation: float = 0.0, scale: float = 1.0):
         sprite = SpriteCircle(128, arcade.color.CHARM_GREEN)
@@ -71,6 +68,15 @@ class Player(Entity):
         self.down = False
         self.left = False
         self.right = False
+
+    @property
+    def scale(self) -> float:
+        return self._scale
+
+    @scale.setter
+    def scale(self, v: float) -> None:
+        self.sprite.scale = v
+        self._scale = v
 
     def update(self, delta_time: float) -> None:
         if self.up:

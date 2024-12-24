@@ -40,3 +40,16 @@ Certain obstacles are easier/harder, or impossible to pass/traverse when at cert
     - Can crush
     - Easy target
     - Ricothet attacks
+
+Speed: base * (1 + (1 / scale))
+Health: base
+Defense: base * scale
+Attack: base * scale
+
+1/4x: bullets miss
+4x+: can crush opponent
+6x+: can ricochet attacks
+4x+: bullets -> aoe
+
+energy bar to size change
+emancipation grill to take energy away
