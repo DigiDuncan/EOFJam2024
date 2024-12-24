@@ -1,6 +1,6 @@
 from eofjam.core.application import View
 
-class eofjamView(View):
+class EOFJamView(View):
 
     def __init__(self) -> None:
         super().__init__()

@@ -2,10 +2,10 @@ from arcade import View as ArcadeView, Window as ArcadeWindow
 # Update these classes if you want custom functionality in your Windows and Views.
 
 __all__ = (
-    'Window',
-    'View',
+    'ArcadeView',
     'ArcadeWindow',
-    'ArcadeView'
+    'View',
+    'Window'
 )
 
 WINDOW_WIDTH, WINDOW_HEIGHT = 1280, 720
