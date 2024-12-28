@@ -1,6 +1,6 @@
 import math
 import arcade
-from arcade import Camera2D, Rect, SpriteList, get_window
+from arcade import Camera2D, Rect, SpriteList, Vec2, get_window
 from arcade.camera.grips import constrain_xy
 
 from eofjam.game.bullet import BulletList
@@ -23,6 +23,8 @@ class World:
 
         self._scale = 1
         self.target_scale = 1
+
+        self.bullet_timer = 0.0
 
         self.draw_bounds = False
 
@@ -48,6 +50,7 @@ class World:
         self.camera.zoom = 1 / clamp(1, s * 4, 16)
 
     def update(self, delta_time: float) -> None:
+        # Handle player scaling
         if self.player.scaling_up and self.player.scaling_down:
             pass
         elif not game.run.unlimited_scale and self.scale >= 2 and self.player.scaling_up:
@@ -69,13 +72,31 @@ class World:
             self.scale -= ds
             self.player.scale_energy -= ds
 
+        # Handle world scaling
         self._scale = smerp(self._scale, self.target_scale, 10, delta_time)
         self.handle_scale()
+
+        # Bullets
+        self.bullet_timer += delta_time
+        if self.bullet_timer >= self.player.fire_rate * self.player.scale:
+            if self.player.fire_up:
+                self.bullets.spawn(self.player, self.player.position, Vec2(0, self.player.bullet_speed), self.player.scale)
+            elif self.player.fire_down:
+                self.bullets.spawn(self.player, self.player.position, Vec2(0, -self.player.bullet_speed), self.player.scale)
+            elif self.player.fire_left:
+                self.bullets.spawn(self.player, self.player.position, Vec2(-self.player.bullet_speed, 0), self.player.scale)
+            elif self.player.fire_right:
+                self.bullets.spawn(self.player, self.player.position, Vec2(self.player.bullet_speed, 0), self.player.scale)
+
+            self.bullet_timer = 0.0
+
+        # Update loops
         self.player.update(delta_time)
         for enemy in self.enemies:
             self.player.position = self.player.hitbox.collide(enemy.hitbox, self.player.position)
         self.bullets.update(delta_time)
 
+        # Camera
         self.camera.position = self.player.position
         self.camera.position = constrain_xy(self.camera.view_data, self.bounds)
 

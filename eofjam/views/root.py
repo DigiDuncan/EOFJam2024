@@ -46,13 +46,13 @@ class RootView(View):
             case arcade.key.D:
                 self.player.right = True
             case arcade.key.NUM_8:
-                self.world.bullets.spawn(self.player, self.player.position, Vec2(0, self.player.bullet_speed), self.player.scale)
+                self.player.fire_up = True
             case arcade.key.NUM_5:
-                self.world.bullets.spawn(self.player, self.player.position, Vec2(0, -self.player.bullet_speed), self.player.scale)
+                self.player.fire_down = True
             case arcade.key.NUM_4:
-                self.world.bullets.spawn(self.player, self.player.position, Vec2(-self.player.bullet_speed, 0), self.player.scale)
+                self.player.fire_left = True
             case arcade.key.NUM_6:
-                self.world.bullets.spawn(self.player, self.player.position, Vec2(self.player.bullet_speed, 0), self.player.scale)
+                self.player.fire_right = True
             case arcade.key.NUM_1:
                 self.world.scale = 1
             case arcade.key.NUM_MULTIPLY:
@@ -76,6 +76,14 @@ class RootView(View):
                 self.player.down = False
             case arcade.key.D:
                 self.player.right = False
+            case arcade.key.NUM_8:
+                self.player.fire_up = False
+            case arcade.key.NUM_5:
+                self.player.fire_down = False
+            case arcade.key.NUM_4:
+                self.player.fire_left = False
+            case arcade.key.NUM_6:
+                self.player.fire_right = False
 
     def on_draw(self) -> None:
         self.clear()
