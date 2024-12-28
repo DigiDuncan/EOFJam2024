@@ -69,6 +69,12 @@ class Player(Entity):
         self.left = False
         self.right = False
 
+        self.scaling_up = False
+        self.scaling_down = False
+
+        self.scale_energy = 2.0
+        self.scale_speed = 1.0
+
     @property
     def scale(self) -> float:
         return self._scale

@@ -1,4 +1,5 @@
 from __future__ import annotations
+import math
 from typing import Any, Protocol, TypeVar, TYPE_CHECKING
 
 from arcade import get_window as get_arcade_window
@@ -71,3 +72,8 @@ def map_range(x: L, n1: L, m1: L, n2: L = -1, m2: L = 1) -> L:
     new_pos = new_max * percentage
     ans = new_pos + n2
     return ans
+
+
+def smerp(start: L, end: L, decay: L, dt: L) -> L:
+    """Lerp between a and b over time independant of fluctuations in dt. https://www.youtube.com/watch?v=LSNQuFEDOyQ"""
+    return end + (start - end) * math.exp(-decay * dt)

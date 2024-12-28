@@ -1,9 +1,10 @@
+import math
 import arcade
 from arcade import Camera2D, Rect, SpriteList, get_window
 from arcade.camera.grips import constrain_xy
 
 from eofjam.core.bullet import BulletList
-from eofjam.lib.utils import clamp
+from eofjam.lib.utils import clamp, smerp
 from eofjam.core.entity import Enemy, Player
 from eofjam.core.store import game
 
@@ -21,6 +22,7 @@ class World:
         self.bullets: BulletList = BulletList(self)
 
         self._scale = 1
+        self.target_scale = 1
 
         self.draw_bounds = False
 
@@ -31,21 +33,44 @@ class World:
 
     @property
     def scale(self) -> float:
-        return round(self._scale / 4, 3)
+        return self.target_scale
 
     @scale.setter
     def scale(self, v: float) -> None:
         if game.run.unlimited_scale:
-            self._scale = round(v * 4, 3)
+            self.target_scale = round(v, 3)
         else:
-            self._scale = clamp(1, round(v * 4, 3), 16)
-        self.handle_scale()
+            self.target_scale = round(clamp(0, v, 2), 3)
 
     def handle_scale(self) -> None:
-        self.player.scale = self.scale
-        self.camera.zoom = 1 / clamp(1, self._scale, 16)
+        s = round(math.exp2(2 * self._scale - 2), 5)
+        self.player.scale = s
+        self.camera.zoom = 1 / clamp(1, s * 4, 16)
 
     def update(self, delta_time: float) -> None:
+        if self.player.scaling_up and self.player.scaling_down:
+            pass
+        elif not game.run.unlimited_scale and self.scale >= 2 and self.player.scaling_up:
+            # We have to do this here to avoid losing energy for no reason
+            pass
+        elif not game.run.unlimited_scale and self.scale <= 0 and self.player.scaling_down:
+            # We have to do this here to avoid losing energy for no reason
+            pass
+        elif self.player.scaling_up:
+            ds = self.player.scale_speed * delta_time
+            if ds > self.player.scale_energy:
+                ds = self.player.scale_energy
+            self.scale += ds
+            self.player.scale_energy -= ds
+        elif self.player.scaling_down:
+            ds = self.player.scale_speed * delta_time
+            if ds > self.player.scale_energy:
+                ds = self.player.scale_energy
+            self.scale -= ds
+            self.player.scale_energy -= ds
+
+        self._scale = smerp(self._scale, self.target_scale, 10, delta_time)
+        self.handle_scale()
         self.player.update(delta_time)
         for enemy in self.enemies:
             self.player.position = self.player.hitbox.collide(enemy.hitbox, self.player.position)
