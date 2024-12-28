@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 import arcade
 from arcade import SpriteCircle, SpriteList, Vec2
 
-from eofjam.core.entity import Entity
+from eofjam.game.entity import Entity
 from eofjam.lib.collider import Collider
 
 if TYPE_CHECKING:

@@ -3,9 +3,9 @@ import arcade
 from arcade import Camera2D, Rect, SpriteList, get_window
 from arcade.camera.grips import constrain_xy
 
-from eofjam.core.bullet import BulletList
+from eofjam.game.bullet import BulletList
 from eofjam.lib.utils import clamp, smerp
-from eofjam.core.entity import Enemy, Player
+from eofjam.game.entity import Enemy, Player
 from eofjam.core.store import game
 
 

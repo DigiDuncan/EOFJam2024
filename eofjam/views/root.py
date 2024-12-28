@@ -2,7 +2,7 @@ import random
 from arcade import Camera2D, Vec2
 import arcade
 from eofjam.core.application import View
-from eofjam.core.entity import Enemy, Player
+from eofjam.game.entity import Enemy, Player
 from eofjam.core.world import World
 from eofjam.core.store import game
 from eofjam.lib.utils import smerp
