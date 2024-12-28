@@ -1,5 +1,5 @@
 import random
-from arcade import Camera2D, SpriteList, Vec2
+from arcade import Camera2D, Vec2
 import arcade
 from eofjam.core.application import View
 from eofjam.core.entity import Enemy, Player
@@ -30,7 +30,7 @@ class RootView(View):
     def on_update(self, delta_time: float) -> None:
         self.world.update(delta_time)
 
-    def on_key_press(self, symbol, modifiers) -> None:
+    def on_key_press(self, symbol, modifiers) -> None:  # noqa: ANN001
         match symbol:
             case arcade.key.NUM_ADD:
                 self.world.scale += 0.025
@@ -57,7 +57,7 @@ class RootView(View):
             case arcade.key.NUM_DIVIDE:
                 self.world.draw_bounds = not self.world.draw_bounds
 
-    def on_key_release(self, symbol, modifiers) -> None:
+    def on_key_release(self, symbol, modifiers) -> None:  # noqa: ANN001
         match symbol:
             case arcade.key.W:
                 self.player.up = False

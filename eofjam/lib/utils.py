@@ -7,13 +7,13 @@ if TYPE_CHECKING:
 
 
 __all__ = (
-    'get_window',
-    'get_arcade_window',
-    'SupportsDunderLT',
-    'SupportsDunderGT',
     'HasAddSubMul',
+    'SupportsDunderGT',
+    'SupportsDunderLT',
     'SupportsRichComparison',
     'clamp',
+    'get_arcade_window',
+    'get_window',
     'map_range'
 )
 

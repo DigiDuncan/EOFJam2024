@@ -4,8 +4,8 @@ from arcade.camera.grips import constrain_xy
 
 from eofjam.core.bullet import BulletList
 from eofjam.lib.utils import clamp
-from .entity import Enemy, Player
-from .store import game
+from eofjam.core.entity import Enemy, Player
+from eofjam.core.store import game
 
 
 class World:
