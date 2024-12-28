@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import arcade
-from arcade import SpriteCircle, Vec2
+from arcade import SpriteCircle, SpriteList, Vec2
 
 from eofjam.core.entity import Entity
 from eofjam.lib.collider import Collider
@@ -59,9 +59,12 @@ class BulletList:
         self.bullets: list[Bullet] = []
         self.world = world
 
+        self.spritelist = SpriteList()
+
     def spawn(self, owner: Entity, position: Vec2, velocity: Vec2 = None, scale: float = 1) -> None:
         b = Bullet(owner, position, velocity, scale)
         self.bullets.append(b)
+        self.spritelist.append(b.sprite)
 
     def update(self, delta_time: float) -> None:
         for b in self.bullets:
@@ -72,6 +75,7 @@ class BulletList:
         rem = [b for b in self.bullets if b.dead]
         for b in rem:
             self.bullets.remove(b)
+            self.spritelist.remove(b.sprite)
 
     def check_collisions(self) -> None:
         for e in [self.world.player, *self.world.enemies]:
@@ -81,5 +85,4 @@ class BulletList:
                     # TODO: Add health code here
 
     def draw(self) -> None:
-        for b in self.bullets:
-            b.draw()
+        self.spritelist.draw()
