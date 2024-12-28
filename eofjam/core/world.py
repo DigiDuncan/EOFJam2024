@@ -1,9 +1,11 @@
-from arcade import Camera2D, Rect, SpriteList, get_window
 import arcade
+from arcade import Camera2D, Rect, SpriteList, get_window
 from arcade.camera.grips import constrain_xy
 
+from eofjam.core.bullet import BulletList
 from eofjam.lib.utils import clamp
 from .entity import Enemy, Player
+from .store import game
 
 
 class World:
@@ -16,6 +18,7 @@ class World:
         self.enemy_spritelist = SpriteList()
         for e in enemies:
             self.enemy_spritelist.append(e.sprite)
+        self.bullets: BulletList = BulletList(self)
 
         self._scale = 1
 
@@ -32,7 +35,10 @@ class World:
 
     @scale.setter
     def scale(self, v: float) -> None:
-        self._scale = clamp(0.125, round(v * 4, 3), 8)
+        if game.run.unlimited_scale:
+            self._scale = round(v * 4, 3)
+        else:
+            self._scale = clamp(1, round(v * 4, 3), 16)
         self.handle_scale()
 
     def handle_scale(self) -> None:
@@ -43,6 +49,7 @@ class World:
         self.player.update(delta_time)
         for enemy in self.enemies:
             self.player.position = self.player.hitbox.collide(enemy.hitbox, self.player.position)
+        self.bullets.update(delta_time)
 
         self.camera.position = self.player.position
         self.camera.position = constrain_xy(self.camera.view_data, self.bounds)
@@ -50,5 +57,6 @@ class World:
     def draw(self) -> None:
         self.enemy_spritelist.draw()
         self.player.draw()
+        self.bullets.draw()
         if self.draw_bounds:
-            arcade.draw_rect_outline(self.world.bounds, arcade.color.BLUE)
+            arcade.draw_rect_outline(self.bounds, arcade.color.BLUE)

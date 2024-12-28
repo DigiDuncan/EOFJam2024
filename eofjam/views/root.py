@@ -1,9 +1,10 @@
 import random
-from arcade import Camera2D, SpriteList
+from arcade import Camera2D, SpriteList, Vec2
 import arcade
 from eofjam.core.application import View
 from eofjam.core.entity import Enemy, Player
 from eofjam.core.world import World
+from eofjam.core.store import game
 
 
 class RootView(View):
@@ -11,7 +12,7 @@ class RootView(View):
     def __init__(self):
         super().__init__()
 
-        self.player = Player(self.window.center)
+        self.player = Player(Vec2(*self.window.center))
         self.camera = Camera2D()
         self.enemies = []
 
@@ -43,6 +44,18 @@ class RootView(View):
                 self.player.down = True
             case arcade.key.D:
                 self.player.right = True
+            case arcade.key.NUM_8:
+                self.world.bullets.spawn(self.player, self.player.position, Vec2(0, self.player.bullet_speed), self.player.scale)
+            case arcade.key.NUM_5:
+                self.world.bullets.spawn(self.player, self.player.position, Vec2(0, -self.player.bullet_speed), self.player.scale)
+            case arcade.key.NUM_4:
+                self.world.bullets.spawn(self.player, self.player.position, Vec2(-self.player.bullet_speed, 0), self.player.scale)
+            case arcade.key.NUM_6:
+                self.world.bullets.spawn(self.player, self.player.position, Vec2(self.player.bullet_speed, 0), self.player.scale)
+            case arcade.key.NUM_MULTIPLY:
+                game.run.unlimited_scale = not game.run.unlimited_scale
+            case arcade.key.NUM_DIVIDE:
+                self.world.draw_bounds = not self.world.draw_bounds
 
     def on_key_release(self, symbol, modifiers) -> None:
         match symbol:
@@ -59,4 +72,5 @@ class RootView(View):
         self.clear()
         with self.camera.activate():
             self.world.draw()
-        arcade.draw_text(f"{self.player.scale}x", 0, self.window.height, anchor_y = "top")
+        arcade.draw_text(f"{self.player.scale}x", 0, self.window.height, anchor_y = "top",
+                         color = arcade.color.RED if game.run.unlimited_scale else arcade.color.WHITE)

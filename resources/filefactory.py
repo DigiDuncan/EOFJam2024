@@ -10,10 +10,10 @@ except ImportError:
     from importlib.resources import Package as Anchor
 
 __all__ = (
-    "make_file_opener",
-    "make_string_opener",
     "make_binary_opener",
-    "make_path_finder"
+    "make_file_opener",
+    "make_path_finder",
+    "make_string_opener"
 )
 
 type IO = _IO[bytes] | _IO[str]
