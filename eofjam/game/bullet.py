@@ -5,7 +5,7 @@ import arcade
 from arcade import SpriteCircle, SpriteList, Vec2
 
 from eofjam.game.entity import Entity
-from eofjam.lib.collider import Collider
+from eofjam.lib.collider import CircleCollider
 
 if TYPE_CHECKING:
     from eofjam.core.world import World
@@ -24,8 +24,8 @@ class Bullet:
         self.max_time: float = 5.0
 
     @property
-    def hitbox(self) -> Collider:
-        return Collider(self.position, self.sprite.width / 2)
+    def hitbox(self) -> CircleCollider:
+        return CircleCollider(self.position, self.sprite.width / 2)
 
     @property
     def position(self) -> Vec2:

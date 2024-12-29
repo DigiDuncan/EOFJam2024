@@ -1,7 +1,7 @@
 import arcade
 from arcade import Sprite, SpriteCircle, Vec2
 
-from eofjam.lib.collider import Collider
+from eofjam.lib.collider import CircleCollider
 
 class Entity:
     def __init__(self, position: Vec2, sprite: Sprite, rotation: float = 0.0, scale: float = 1.0):
@@ -21,8 +21,8 @@ class Entity:
         self.bullet_speed: float = 500
 
     @property
-    def hitbox(self) -> Collider:
-        return Collider(self.position, self.sprite.width / 2)
+    def hitbox(self) -> CircleCollider:
+        return CircleCollider(self.position, self.sprite.width / 2)
 
     @property
     def position(self) -> Vec2:
