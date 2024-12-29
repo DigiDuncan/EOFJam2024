@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 import arcade
 from arcade import SpriteCircle, SpriteList, Vec2
 
+from eofjam.game.entity import Player
 from eofjam.lib.collider import CircleCollider
 
 if TYPE_CHECKING:
@@ -12,7 +13,8 @@ if TYPE_CHECKING:
 
 
 class Bullet:
-    def __init__(self, owner: Entity, position: Vec2, velocity: Vec2 = None, scale: float = 1):
+    def __init__(self, owner: Entity, position: Vec2, velocity: Vec2 = None, scale: float = 1,
+                 health_loss: float = 1.0, energy_loss: float = 0.0):
         self.owner = owner
         self.sprite = SpriteCircle(128, arcade.color.BLUE)
         self.position = position
@@ -22,6 +24,9 @@ class Bullet:
         self.time_alive: float = 0
 
         self.max_time: float = 5.0
+
+        self.health_loss = health_loss
+        self.energy_loss = energy_loss
 
     @property
     def hitbox(self) -> CircleCollider:
@@ -82,7 +87,9 @@ class BulletList:
             for b in self.bullets:
                 if b.hitbox.overlaps(e.hitbox) and e != b.owner:
                     b.dead = True
-                    # TODO: Add health code here
+                    e.health -= b.health_loss
+                    if isinstance(e, Player):
+                        e.scale_energy -= b.energy_loss
 
     def draw(self) -> None:
         self.spritelist.draw()

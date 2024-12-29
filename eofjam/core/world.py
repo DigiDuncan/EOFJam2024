@@ -151,6 +151,16 @@ class World:
                         entity.position += abs(overlap) * normal
                     hazard.interact(entity)
 
+        # Health
+        rem = []
+        for e in self.enemies:
+            if e.health <= 0:
+                rem.append(e)
+        for e in rem:
+            self.enemies.remove(e)
+
+        self.refresh_enemies()
+
         # Camera
         self.camera.position = self.player.position
         self.camera.position = constrain_xy(self.camera.view_data, self.bounds)

@@ -1,8 +1,12 @@
+from __future__ import annotations
 import math
+from typing import TYPE_CHECKING
 import arcade
 from arcade import Sprite, SpriteCircle, Vec2
 
-from eofjam.game.bullet import BulletList
+if TYPE_CHECKING:
+    from eofjam.game.bullet import BulletList
+
 from eofjam.lib.collider import CircleCollider
 
 class Entity:
