@@ -1,5 +1,5 @@
 import arcade
-from arcade import Rect, draw_rect_filled, draw_text
+from arcade import Rect, Vec2, draw_rect_filled, draw_text
 
 from eofjam.game.entity import Entity
 from eofjam.lib.collider import RectCollider
@@ -15,11 +15,12 @@ class Hazard:
     def hitbox(self) -> RectCollider:
         return RectCollider(self.rect)
 
-    def collide(self, other: Entity) -> None:
+    def collide(self, other: Entity) -> Vec2:
         if (self.min_scale is not None and other.scale < self.min_scale) or (self.max_scale is not None and other.scale > self.max_scale):
-            # other.position = other.hitbox.collide(self.hitbox, other.position)
+            # return other.hitbox.collide(self.hitbox, other.position)
             # TODO: Circles and rectangles can't collide right now! A!
-            pass
+            ...
+        return other.position
 
     def draw(self) -> None:
         if self.min_scale is not None and self.max_scale is not None:

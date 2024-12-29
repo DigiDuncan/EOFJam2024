@@ -7,7 +7,7 @@ from eofjam.game.bullet import BulletList
 from eofjam.game.grill import Grill
 from eofjam.game.hazard import Hazard
 from eofjam.lib.utils import clamp, smerp
-from eofjam.game.entity import Enemy, Player
+from eofjam.game.entity import Enemy, Entity, Player
 from eofjam.core.store import game
 
 
@@ -33,6 +33,10 @@ class World:
         self.bullet_timer = 0.0
 
         self.draw_bounds = False
+
+    @property
+    def entities(self) -> list[Entity]:
+        return [self.player, *self.enemies]
 
     def refresh_enemies(self) -> None:
         self.enemy_spritelist.clear()
@@ -96,10 +100,17 @@ class World:
 
             self.bullet_timer = 0.0
 
-        # Update loops
-        self.player.update(delta_time)
+        # Collision checks?
         for enemy in self.enemies:
             self.player.position = self.player.hitbox.collide(enemy.hitbox, self.player.position)
+        for hazard in self.hazards:
+            for entity in self.entities:
+                entity.position = hazard.collide(entity)
+        for grill in self.grills:
+            grill.collide(self.player)
+
+        # Update loops
+        self.player.update(delta_time)
         self.bullets.update(delta_time)
 
         # Camera
