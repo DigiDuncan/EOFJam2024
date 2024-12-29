@@ -4,17 +4,16 @@ from arcade import Camera2D, Rect, SpriteList, Vec2, get_window
 from arcade.camera.grips import constrain_xy
 
 from eofjam.game.bullet import BulletList
-from eofjam.game.grill import Grill
 from eofjam.game.hazard import Hazard
 from eofjam.lib.utils import clamp, smerp
 from eofjam.game.entity import Enemy, Entity, Player
 from eofjam.core.store import game
-from eofjam.lib.collider import Collider, RectCollider, CircleCollider, InverseRectCollider
+from eofjam.lib.collider import Collider, InverseRectCollider
 
 
 class World:
     def __init__(self, player: Player, camera: Camera2D, enemies: list[Enemy] = None,
-                 hazards: list[Hazard] = None, grills: list[Grill] = None):
+                 hazards: list[Hazard] = None):
         self.player: Player = player
         self.camera: Camera2D = camera
         self.bounds: Rect = get_window().rect * 4
@@ -22,8 +21,6 @@ class World:
         self.terrain: list[Collider] = [InverseRectCollider(self.bounds)]
         self.enemies: list[Enemy] = [] if enemies is None else enemies
         self.hazards: list[Hazard] = [] if hazards is None else hazards
-        self.grills: list[Grill] = [] if grills is None else grills
-
 
         self.enemy_spritelist = SpriteList()
         for e in enemies:
@@ -110,18 +107,16 @@ class World:
         # update loops
         self.player.update(delta_time)
         self.bullets.update(delta_time)
-        
+
         # Update positions
         for entity in self.entities:
             entity.position += entity.velocity * delta_time
 
         # Collision checks?
-
         # For ease of logic lets do this in a few steps (reduces loop count too)
 
         entities = self.entities
 
-        
         for entity in entities:
             collider = entity.hitbox
 
@@ -130,43 +125,30 @@ class World:
                 other_c = other.hitbox
                 if other == entity or not collider.overlaps(other_c):
                     continue
-                
+
                 overlap, normal = collider.collide(other_c)
+                # These mass calculations are rough, but hey, it's a game jam.
+                e_mass = max(1.0, 4 * entity.scale) ** 2
+                o_mass = max(1.0, 4 * other.scale) ** 2
+                entity.position += abs(overlap) * normal / e_mass
+                other.position += -abs(overlap) * normal / o_mass
 
-                entity.position += abs(overlap) * normal / max(1.0, 4 * entity.scale)**2
-                other.position += -abs(overlap) * normal / max(1.0, 4 * other.scale)**2
-
-            
             # entity - terrain collisions
             for terrain in self.terrain:
                 if not collider.overlaps(terrain):
                     continue
 
                 overlap, normal = collider.collide(terrain)
-
                 entity.position += abs(overlap) * normal
-         
 
             # entity - hazard collisions
             for hazard in self.hazards:
                 hazard_c = hazard.hitbox
-                if not collider.overlaps(hazard_c) or hazard.passable(entity.scale):
-                    continue
-                
-                # TODO: hazard.interact(entity)
-
-                overlap, normal = collider.collide(hazard_c)
-
-                entity.position += abs(overlap) * normal
-                
-        # for enemy in self.enemies:
-        #     self.player.position = self.player.hitbox.collide(enemy.hitbox, self.player.position)
-        # for hazard in self.hazards:
-        #     for entity in self.entities:
-        #         entity.position = hazard.collide(entity)
-        # for grill in self.grills:
-        #     grill.collide(self.player)
-
+                if collider.overlaps(hazard_c):
+                    if not hazard.passable(entity.scale):
+                        overlap, normal = collider.collide(hazard_c)
+                        entity.position += abs(overlap) * normal
+                    hazard.interact(entity)
 
         # Camera
         self.camera.position = self.player.position
@@ -175,8 +157,6 @@ class World:
     def draw(self) -> None:
         for h in self.hazards:
             h.draw()
-        for g in self.grills:
-            g.draw()
         self.enemy_spritelist.draw()
         self.player.draw()
         self.bullets.draw()

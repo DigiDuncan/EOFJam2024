@@ -5,7 +5,7 @@ from eofjam.core.application import View
 from eofjam.game.entity import Enemy, Player
 from eofjam.core.world import World
 from eofjam.core.store import game
-from eofjam.game.hazard import Hazard
+from eofjam.game.hazard import Charger, Grill, Hazard
 
 
 class RootView(View):
@@ -26,6 +26,12 @@ class RootView(View):
 
         r = XYWH(self.window.center_x, 2000, 800, 400)
         self.world.hazards.append(Hazard(r, max_scale = 1.0))
+
+        gr = XYWH(self.window.center_x + 2000, 2000, 800, 400)
+        self.world.hazards.append(Grill(gr))
+
+        cr = XYWH(self.window.center_x + 4000, 2000, 800, 400)
+        self.world.hazards.append(Charger(cr))
 
         self.world.enemies = self.enemies
         self.world.refresh_enemies()
