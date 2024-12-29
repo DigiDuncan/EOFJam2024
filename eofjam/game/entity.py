@@ -20,7 +20,7 @@ class Entity:
         self.health: int = 1
         self.strength: float = 1
         self.defense: float = 1
-        self.speed: float = 400
+        self._speed: float = 400
         self.bullet_speed: float = 500
 
         self.immobile = False
@@ -55,6 +55,14 @@ class Entity:
     def scale(self, v: float) -> None:
         self.sprite.scale = round(v / 4, 3)
         self._scale = round(v, 3)
+
+    @property
+    def speed(self) -> float:
+        return self._speed / math.sqrt(self.scale)
+
+    @speed.setter
+    def speed(self, v: float) -> None:
+        self._speed = v
 
     def draw(self) -> None:
         arcade.draw_sprite(self.sprite)
