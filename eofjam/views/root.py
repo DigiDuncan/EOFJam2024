@@ -1,11 +1,11 @@
 import random
-from arcade import Camera2D, Vec2
+from arcade import XYWH, Camera2D, Vec2
 import arcade
 from eofjam.core.application import View
 from eofjam.game.entity import Enemy, Player
 from eofjam.core.world import World
 from eofjam.core.store import game
-from eofjam.lib.utils import smerp
+from eofjam.game.hazard import Hazard
 
 
 class RootView(View):
@@ -24,9 +24,13 @@ class RootView(View):
             e = Enemy(p)
             self.enemies.append(e)
 
+        r = XYWH(self.window.center_x, 2000, 800, 400)
+        self.world.hazards.append(Hazard(r, max_scale = 1.0))
+
         self.world.enemies = self.enemies
         self.world.refresh_enemies()
         self.world.scale = 1
+        self.world.draw_bounds = True
 
     def on_update(self, delta_time: float) -> None:
         self.world.update(delta_time)

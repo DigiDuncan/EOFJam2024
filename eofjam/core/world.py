@@ -4,16 +4,22 @@ from arcade import Camera2D, Rect, SpriteList, Vec2, get_window
 from arcade.camera.grips import constrain_xy
 
 from eofjam.game.bullet import BulletList
+from eofjam.game.grill import Grill
+from eofjam.game.hazard import Hazard
 from eofjam.lib.utils import clamp, smerp
 from eofjam.game.entity import Enemy, Player
 from eofjam.core.store import game
 
 
 class World:
-    def __init__(self, player: Player, camera: Camera2D, enemies: list[Enemy] = None):
+    def __init__(self, player: Player, camera: Camera2D, enemies: list[Enemy] = None,
+                 hazards: list[Hazard] = None, grills: list[Grill] = None):
         self.player: Player = player
         self.camera: Camera2D = camera
         self.enemies: list[Enemy] = [] if enemies is None else enemies
+        self.hazards: list[Hazard] = [] if hazards is None else hazards
+        self.grills: list[Grill] = [] if grills is None else grills
+
         self.bounds: Rect = get_window().rect * 4
 
         self.enemy_spritelist = SpriteList()
@@ -101,6 +107,10 @@ class World:
         self.camera.position = constrain_xy(self.camera.view_data, self.bounds)
 
     def draw(self) -> None:
+        for h in self.hazards:
+            h.draw()
+        for g in self.grills:
+            g.draw()
         self.enemy_spritelist.draw()
         self.player.draw()
         self.bullets.draw()
