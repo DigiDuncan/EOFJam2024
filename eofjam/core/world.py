@@ -9,7 +9,7 @@ from eofjam.game.hazard import Hazard
 from eofjam.lib.utils import clamp, smerp
 from eofjam.game.entity import Enemy, Entity, Player
 from eofjam.core.store import game
-from eofjam.lib.collider import Collider, RectCollider, CircleCollider
+from eofjam.lib.collider import Collider, RectCollider, CircleCollider, InverseRectCollider
 
 
 class World:
@@ -17,12 +17,13 @@ class World:
                  hazards: list[Hazard] = None, grills: list[Grill] = None):
         self.player: Player = player
         self.camera: Camera2D = camera
-        self.terrain: list[Collider] = []
+        self.bounds: Rect = get_window().rect * 4
+
+        self.terrain: list[Collider] = [InverseRectCollider(self.bounds)]
         self.enemies: list[Enemy] = [] if enemies is None else enemies
         self.hazards: list[Hazard] = [] if hazards is None else hazards
         self.grills: list[Grill] = [] if grills is None else grills
 
-        self.bounds: Rect = get_window().rect * 4
 
         self.enemy_spritelist = SpriteList()
         for e in enemies:
