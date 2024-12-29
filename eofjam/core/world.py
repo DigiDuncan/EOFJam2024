@@ -88,17 +88,21 @@ class World:
 
         # Bullets
         self.bullet_timer += delta_time
-        if self.bullet_timer >= self.player.fire_rate * self.player.scale:
+        if self.bullet_timer >= self.player.fire_rate * self.player.scale and (self.player.fire_up or self.player.fire_down or self.player.fire_left or self.player.fire_right):
+            v = Vec2(0, 0)
             if self.player.fire_up:
-                self.bullets.spawn(self.player, self.player.position, Vec2(0, self.player.bullet_speed), self.player.scale)
-            elif self.player.fire_down:
-                self.bullets.spawn(self.player, self.player.position, Vec2(0, -self.player.bullet_speed), self.player.scale)
-            elif self.player.fire_left:
-                self.bullets.spawn(self.player, self.player.position, Vec2(-self.player.bullet_speed, 0), self.player.scale)
-            elif self.player.fire_right:
-                self.bullets.spawn(self.player, self.player.position, Vec2(self.player.bullet_speed, 0), self.player.scale)
+                v += Vec2(0, 1)
+            if self.player.fire_down:
+                v += Vec2(0, -1)
+            if self.player.fire_left:
+                v += Vec2(-1, 0)
+            if self.player.fire_right:
+                v += Vec2(1, 0)
 
-            self.bullet_timer = 0.0
+            v = v.normalize() * self.player.bullet_speed
+            if v.length != 0:
+                self.bullets.spawn(self.player, self.player.position, v, self.player.scale)
+                self.bullet_timer = 0.0
 
         # Collision checks?
         for enemy in self.enemies:
