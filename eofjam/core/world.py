@@ -16,7 +16,7 @@ class World:
                  hazards: list[Hazard] = None):
         self.player: Player = player
         self.camera: Camera2D = camera
-        self.bounds: Rect = get_window().rect * 4
+        self.bounds: Rect = get_window().rect * 8
 
         self.terrain: list[Collider] = [InverseRectCollider(self.bounds)]
         self.enemies: list[Enemy] = [] if enemies is None else enemies
