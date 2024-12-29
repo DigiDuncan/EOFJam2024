@@ -15,12 +15,8 @@ class Hazard:
     def hitbox(self) -> RectCollider:
         return RectCollider(self.rect)
 
-    def collide(self, other: Entity) -> Vec2:
-        if (self.min_scale is not None and other.scale < self.min_scale) or (self.max_scale is not None and other.scale > self.max_scale):
-            # return other.hitbox.collide(self.hitbox, other.position)
-            # TODO: Circles and rectangles can't collide right now! A!
-            ...
-        return other.position
+    def passable(self, scale: float) -> bool:
+        return (self.min_scale is not None and scale < self.min_scale) or (self.max_scale is not None and scale > self.max_scale)
 
     def draw(self) -> None:
         if self.min_scale is not None and self.max_scale is not None:

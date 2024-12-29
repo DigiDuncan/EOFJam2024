@@ -9,6 +9,7 @@ class Entity:
         self._rotation: float = rotation
         self.sprite: Sprite = sprite
         self._scale: float = scale
+        self.velocity: Vec2 = Vec2()
 
         self.position = position
         self.rotation = rotation
@@ -92,11 +93,5 @@ class Player(Entity):
         self._scale = v
 
     def update(self, delta_time: float) -> None:
-        if self.up:
-            self.position = self.position + Vec2(0, self.speed * delta_time)
-        if self.down:
-            self.position = self.position + Vec2(0, -self.speed * delta_time)
-        if self.left:
-            self.position = self.position + Vec2(-self.speed * delta_time, 0)
-        if self.right:
-            self.position = self.position + Vec2(self.speed * delta_time, 0)
+        direction = Vec2(self.right - self.left, self.up - self.down).normalize()
+        self.velocity = direction * self.speed

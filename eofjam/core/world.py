@@ -9,6 +9,7 @@ from eofjam.game.hazard import Hazard
 from eofjam.lib.utils import clamp, smerp
 from eofjam.game.entity import Enemy, Entity, Player
 from eofjam.core.store import game
+from eofjam.lib.collider import Collider, RectCollider, CircleCollider
 
 
 class World:
@@ -16,6 +17,7 @@ class World:
                  hazards: list[Hazard] = None, grills: list[Grill] = None):
         self.player: Player = player
         self.camera: Camera2D = camera
+        self.terrain: list[Collider] = []
         self.enemies: list[Enemy] = [] if enemies is None else enemies
         self.hazards: list[Hazard] = [] if hazards is None else hazards
         self.grills: list[Grill] = [] if grills is None else grills
@@ -104,18 +106,66 @@ class World:
                 self.bullets.spawn(self.player, self.player.position, v, self.player.scale)
                 self.bullet_timer = 0.0
 
-        # Collision checks?
-        for enemy in self.enemies:
-            self.player.position = self.player.hitbox.collide(enemy.hitbox, self.player.position)
-        for hazard in self.hazards:
-            for entity in self.entities:
-                entity.position = hazard.collide(entity)
-        for grill in self.grills:
-            grill.collide(self.player)
-
-        # Update loops
+        # update loops
         self.player.update(delta_time)
         self.bullets.update(delta_time)
+        
+        # Update positions
+        for entity in self.entities:
+            entity.position += entity.velocity * delta_time
+
+        # Collision checks?
+
+        # For ease of logic lets do this in a few steps (reduces loop count too)
+
+        entities = self.entities
+
+        
+        for entity in entities:
+            collider = entity.hitbox
+
+            # entity - player collisions
+            for other in entities:
+                other_c = other.hitbox
+                if other == entity or not collider.overlaps(other_c):
+                    continue
+                
+                overlap, normal = collider.collide(other_c)
+
+                entity.position += abs(overlap) * normal / max(1.0, 4 * entity.scale)**2
+                other.position += -abs(overlap) * normal / max(1.0, 4 * other.scale)**2
+
+            
+            # entity - terrain collisions
+            for terrain in self.terrain:
+                if not collider.overlaps(terrain):
+                    continue
+
+                overlap, normal = collider.collide(terrain)
+
+                entity.position += abs(overlap) * normal
+         
+
+            # entity - hazard collisions
+            for hazard in self.hazards:
+                hazard_c = hazard.hitbox
+                if not collider.overlaps(hazard_c) or hazard.passable(entity.scale):
+                    continue
+                
+                # TODO: hazard.interact(entity)
+
+                overlap, normal = collider.collide(hazard_c)
+
+                entity.position += abs(overlap) * normal
+                
+        # for enemy in self.enemies:
+        #     self.player.position = self.player.hitbox.collide(enemy.hitbox, self.player.position)
+        # for hazard in self.hazards:
+        #     for entity in self.entities:
+        #         entity.position = hazard.collide(entity)
+        # for grill in self.grills:
+        #     grill.collide(self.player)
+
 
         # Camera
         self.camera.position = self.player.position
