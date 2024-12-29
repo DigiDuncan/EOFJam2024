@@ -126,4 +126,4 @@ class World:
         self.player.draw()
         self.bullets.draw()
         if self.draw_bounds:
-            arcade.draw_rect_outline(self.bounds, arcade.color.BLUE)
+            arcade.draw_rect_outline(self.bounds, arcade.color.BLUE, border_width = max(1, int(self.player.scale * 4)))
