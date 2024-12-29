@@ -2,7 +2,7 @@ import random
 from arcade import XYWH, Camera2D, Vec2
 import arcade
 from eofjam.core.application import View
-from eofjam.game.entity import Enemy, Player
+from eofjam.game.entity import BulletSpawner, Enemy, Player
 from eofjam.core.world import World
 from eofjam.core.store import game
 from eofjam.game.hazard import Charger, Grill, Hazard
@@ -32,6 +32,9 @@ class RootView(View):
 
         cr = XYWH(self.window.center_x + 4000, 2000, 800, 400)
         self.world.hazards.append(Charger(cr))
+
+        spawner = BulletSpawner(self.world.bullets, Vec2(self.window.center_x + 3000, 2000), speed = 90)
+        self.enemies.append(spawner)
 
         self.world.enemies = self.enemies
         self.world.refresh_enemies()

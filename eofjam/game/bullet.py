@@ -4,10 +4,10 @@ from typing import TYPE_CHECKING
 import arcade
 from arcade import SpriteCircle, SpriteList, Vec2
 
-from eofjam.game.entity import Entity
 from eofjam.lib.collider import CircleCollider
 
 if TYPE_CHECKING:
+    from eofjam.game.entity import Entity
     from eofjam.core.world import World
 
 

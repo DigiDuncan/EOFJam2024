@@ -105,7 +105,8 @@ class World:
                 self.bullet_timer = 0.0
 
         # update loops
-        self.player.update(delta_time)
+        for e in self.entities:
+            e.update(delta_time)
         self.bullets.update(delta_time)
 
         # Update positions
@@ -128,8 +129,8 @@ class World:
 
                 overlap, normal = collider.collide(other_c)
                 # These mass calculations are rough, but hey, it's a game jam.
-                e_mass = max(1.0, 4 * entity.scale) ** 2
-                o_mass = max(1.0, 4 * other.scale) ** 2
+                e_mass = max(1.0, 4 * entity.scale) ** 2 if not entity.immobile else math.inf
+                o_mass = max(1.0, 4 * other.scale) ** 2 if not other.immobile else math.inf
                 entity.position += abs(overlap) * normal / e_mass
                 other.position += -abs(overlap) * normal / o_mass
 

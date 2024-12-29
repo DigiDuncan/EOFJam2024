@@ -1,6 +1,8 @@
+import math
 import arcade
 from arcade import Sprite, SpriteCircle, Vec2
 
+from eofjam.game.bullet import BulletList
 from eofjam.lib.collider import CircleCollider
 
 class Entity:
@@ -20,6 +22,8 @@ class Entity:
         self.defense: float = 1
         self.speed: float = 400
         self.bullet_speed: float = 500
+
+        self.immobile = False
 
     @property
     def hitbox(self) -> CircleCollider:
@@ -54,6 +58,9 @@ class Entity:
 
     def draw(self) -> None:
         arcade.draw_sprite(self.sprite)
+
+    def update(self, delta_time: float) -> None:
+        ...
 
 class Enemy(Entity):
     def __init__(self, position: Vec2, rotation: float = 0.0, scale: float = 1.0):
@@ -95,3 +102,24 @@ class Player(Entity):
     def update(self, delta_time: float) -> None:
         direction = Vec2(self.right - self.left, self.up - self.down).normalize()
         self.velocity = direction * self.speed
+
+class BulletSpawner(Entity):
+    def __init__(self, bullet_list: BulletList, position: Vec2, rotation: float = 0.0, scale: float = 1, speed: float = 0.0, fire_rate: float = 0.25):
+        sprite = SpriteCircle(256, arcade.color.DARK_BLUE)
+        super().__init__(position, sprite, rotation, scale)
+
+        self.bullet_list = bullet_list
+        self.speed = speed
+        self.immobile = True
+        self.fire_rate = fire_rate
+        self.active = True
+
+        self.bullet_timer = 0.0
+
+    def update(self, delta_time: float) -> None:
+        self.bullet_timer += delta_time
+        if self.active:
+            self.rotation += self.speed * delta_time
+            if self.bullet_timer >= self.fire_rate:
+                self.bullet_list.spawn(self, self.position, Vec2.from_heading(self.rotation / (360 / math.tau), self.bullet_speed), self.scale)
+                self.bullet_timer = 0.0
