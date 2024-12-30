@@ -1,5 +1,6 @@
 from collections.abc import Sequence
 import json
+from typing import Iterable
 from .filefactory import make_file_opener, make_path_finder, make_string_opener
 from arcade import (
     ArcadeContext,

@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 import arcade
 from arcade import SpriteCircle, SpriteList, Vec2
 
+from eofjam.constants import BULLET_NONE_COLOR, BULLET_HEALTH_COLOR, BULLET_ENERGY_COLOR, BULLET_BOTH_COLOR
 from eofjam.game.entity import Player
 from eofjam.lib.collider import CircleCollider
 
@@ -18,13 +19,13 @@ class Bullet:
         self.owner = owner
 
         if health_loss and energy_loss:
-            color = arcade.color.RED
+            color = BULLET_BOTH_COLOR
         elif health_loss:
-            color = arcade.color.BLUE
+            color = BULLET_HEALTH_COLOR
         elif energy_loss:
-            color = arcade.color.GREEN
+            color = BULLET_ENERGY_COLOR
         else:
-            color = arcade.color.WHITE
+            color = BULLET_NONE_COLOR
 
         self.sprite = SpriteCircle(128, color)
 

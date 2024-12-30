@@ -3,6 +3,7 @@ import arcade
 from arcade import Camera2D, Rect, SpriteList, Vec2, get_window
 from arcade.camera.grips import constrain_xy
 
+from eofjam.constants import DEBUG_COLOR
 from eofjam.game.bullet import BulletList
 from eofjam.game.hazard import Hazard
 from eofjam.lib.utils import clamp, smerp
@@ -172,4 +173,4 @@ class World:
         self.player.draw()
         self.bullets.draw()
         if self.draw_bounds:
-            arcade.draw_rect_outline(self.bounds, arcade.color.BLUE, border_width = max(1, int(self.player.scale * 4)))
+            arcade.draw_rect_outline(self.bounds, DEBUG_COLOR, border_width = max(1, int(self.player.scale * 4)))

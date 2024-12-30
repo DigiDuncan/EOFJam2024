@@ -7,6 +7,7 @@ from arcade import Sprite, SpriteCircle, Vec2
 if TYPE_CHECKING:
     from eofjam.game.bullet import BulletList
 
+from eofjam.constants import ENEMY_COLOR, PLAYER_COLOR, SPAWNER_COLOR
 from eofjam.lib.collider import CircleCollider
 
 class Entity:
@@ -76,12 +77,12 @@ class Entity:
 
 class Enemy(Entity):
     def __init__(self, position: Vec2, rotation: float = 0.0, scale: float = 1.0):
-        sprite = SpriteCircle(512, arcade.color.CHARM_PINK)
+        sprite = SpriteCircle(512, ENEMY_COLOR)
         super().__init__(position, sprite, rotation, scale)
 
 class Player(Entity):
     def __init__(self, position: Vec2, rotation: float = 0.0, scale: float = 1.0):
-        sprite = SpriteCircle(128, arcade.color.CHARM_GREEN)
+        sprite = SpriteCircle(128, PLAYER_COLOR)
         super().__init__(position, sprite, rotation, scale)
 
         self.up = False
@@ -117,7 +118,7 @@ class Player(Entity):
 
 class BulletSpawner(Entity):
     def __init__(self, bullet_list: BulletList, position: Vec2, rotation: float = 0.0, scale: float = 1, speed: float = 0.0, fire_rate: float = 0.25):
-        sprite = SpriteCircle(256, arcade.color.DARK_BLUE)
+        sprite = SpriteCircle(256, SPAWNER_COLOR)
         super().__init__(position, sprite, rotation, scale)
 
         self.bullet_list = bullet_list

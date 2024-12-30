@@ -1,6 +1,8 @@
 import random
 from arcade import XYWH, Camera2D, Vec2
 import arcade
+
+from eofjam.constants import BG_COLOR, DEBUG_COLOR, TEXT_COLOR
 from eofjam.core.application import View
 from eofjam.game.entity import BulletSpawner, Enemy, Player
 from eofjam.core.world import World
@@ -99,8 +101,9 @@ class RootView(View):
                 self.player.fire_right = False
 
     def on_draw(self) -> None:
-        self.clear()
+        self.clear(BG_COLOR)
         with self.camera.activate():
             self.world.draw()
         arcade.draw_text(f"{self.player.scale}x\nEnergy: {self.player.scale_energy:.3f}", 0, self.window.height, anchor_y = "top",
-                         color = arcade.color.RED if game.run.unlimited_scale else arcade.color.WHITE, multiline = True, width = 400)
+                         color = DEBUG_COLOR if game.run.unlimited_scale else TEXT_COLOR, multiline = True, width = 400,
+                         font_name = "CMUNRM")
