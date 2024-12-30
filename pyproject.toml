@@ -15,7 +15,7 @@ requires-python = ">= 3.12"
 dependencies = [
     "arcade @ git+https://github.com/pythonarcade/arcade@development",
     "digiformatter==0.5.7.2",
-    "platformdirs==1.4.3"
+    "platformdirs==4.3.6"
 ]
 
 [project.optional-dependencies]
