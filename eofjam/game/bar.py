@@ -61,7 +61,7 @@ class Bar:
         self.atlas._texture_uvs.set_slot_data(slot, self.crop_region.texture_coordinates)
 
         self.middle_sprite.width = self.crop_region.width
-        self.middle_sprite.left = self.position - self.middle_tex.width / 2.0
+        self.middle_sprite.left = self.position.x - self.middle_tex.width / 2.0
 
         self.spritelist.draw()
 
