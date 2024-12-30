@@ -21,7 +21,7 @@ class RootView(View):
 
         self.world = World(self.player, self.camera, self.enemies)
 
-        for _ in range(25):
+        for _ in range(50):
             p = (self.world.bounds).uv_to_position((random.random(), random.random()))
             e = Enemy(p)
             self.enemies.append(e)
@@ -106,4 +106,4 @@ class RootView(View):
             self.world.draw()
         arcade.draw_text(f"{self.player.scale}x\nEnergy: {self.player.scale_energy:.3f}", 0, self.window.height, anchor_y = "top",
                          color = DEBUG_COLOR if game.run.unlimited_scale else TEXT_COLOR, multiline = True, width = 400,
-                         font_name = "CMUNRM")
+                         font_name = "CMUNRM", font_size = 24)
