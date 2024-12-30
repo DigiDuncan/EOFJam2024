@@ -10,6 +10,8 @@ if TYPE_CHECKING:
 from eofjam.constants import ENEMY_COLOR, PLAYER_COLOR, SPAWNER_COLOR
 from eofjam.lib.collider import CircleCollider
 
+TAU_THREE_SIXTYTHS = math.tau / 360
+
 class Entity:
     def __init__(self, position: Vec2, sprite: Sprite, rotation: float = 0.0, scale: float = 1.0):
         self._position: Vec2 = position
@@ -136,5 +138,5 @@ class BulletSpawner(Entity):
         if self.active:
             self.rotation += self.speed * delta_time
             if self.bullet_timer >= self.fire_rate:
-                self.bullet_list.spawn(self, self.position, Vec2.from_heading(self.rotation / (360 / math.tau), self.bullet_speed), self.scale)
+                self.bullet_list.spawn(self, self.position, Vec2.from_heading(self.rotation * TAU_THREE_SIXTYTHS, self.bullet_speed), self.scale)
                 self.bullet_timer = 0.0
