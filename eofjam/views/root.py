@@ -22,7 +22,7 @@ class RootView(View):
 
         self.world = World(self.player, self.camera, self.enemies)
 
-        self.health_bar = HealthBar(self.window.rect.top_right)
+        self.health_bar = HealthBar(self.window.rect.top_right - Vec2(5, 5))
 
         for _ in range(50):
             p = (self.world.bounds).uv_to_position((random.random(), random.random()))

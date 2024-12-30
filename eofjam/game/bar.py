@@ -28,6 +28,8 @@ class Bar:
             self.front_sprite = Sprite(self.front_tex)
             self.spritelist.append(self.front_sprite)
 
+        self.position = position
+
         self._percentage = 1.0
 
     @property
@@ -37,9 +39,9 @@ class Bar:
     @position.setter
     def position(self, v: Vec2) -> None:
         self._position = v
-        self._position -= Vec2(*self.middle_sprite.size)
+        self._position -= Vec2(*self.middle_tex.size) / 2
         for s in self.spritelist:
-            s.position = v
+            s.position = self._position
 
     @property
     def percentage(self) -> float:
@@ -50,9 +52,10 @@ class Bar:
         self._percentage = v
 
     def draw(self) -> None:
-        self.crop_region.x, self.crop_region.y = self.middle_region.x, self.middle_region.y
+        self.crop_region.y = self.middle_region.y
         self.crop_region.height = self.middle_region.height
         self.crop_region.width = self.percentage * self.middle_region.width
+        self.crop_region.x = self.middle_region.x + self.middle_region.width - self.crop_region.width
 
         ux, uy, uw, uh = self.crop_region.x / self.atlas.width, self.crop_region.y / self.atlas.height, self.crop_region.width / self.atlas.width, self.crop_region.height / self.atlas.height
         self.crop_region.texture_coordinates = (ux, uy, ux + uw, uy, ux, uy + uh, ux + uw, uy + uh)
@@ -61,7 +64,7 @@ class Bar:
         self.atlas._texture_uvs.set_slot_data(slot, self.crop_region.texture_coordinates)
 
         self.middle_sprite.width = self.crop_region.width
-        self.middle_sprite.left = self.position.x - self.middle_tex.width / 2.0
+        self.middle_sprite.right = self.position.x + self.middle_tex.width / 2.0
 
         self.spritelist.draw()
 
