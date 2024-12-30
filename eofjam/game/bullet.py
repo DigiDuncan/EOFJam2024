@@ -16,7 +16,18 @@ class Bullet:
     def __init__(self, owner: Entity, position: Vec2, velocity: Vec2 = None, scale: float = 1,
                  health_loss: float = 1.0, energy_loss: float = 0.0):
         self.owner = owner
-        self.sprite = SpriteCircle(128, arcade.color.BLUE)
+
+        if health_loss and energy_loss:
+            color = arcade.color.RED
+        elif health_loss:
+            color = arcade.color.BLUE
+        elif energy_loss:
+            color = arcade.color.GREEN
+        else:
+            color = arcade.color.WHITE
+
+        self.sprite = SpriteCircle(128, color)
+
         self.position = position
         self.velocity = velocity if velocity else Vec2(0, 0)
         self.scale = scale
