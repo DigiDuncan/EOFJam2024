@@ -112,6 +112,6 @@ class RootView(View):
             self.world.draw()
         self.health_bar.draw()
         self.energy_bar.draw()
-        arcade.draw_text(f"{self.player.scale}x\nEnergy: {self.player.scale_energy:.3f}", 0, self.window.height, anchor_y = "top",
+        arcade.draw_text(f"{self.player.scale}x", 0, self.window.height, anchor_y = "top",
                          color = DEBUG_COLOR if game.run.unlimited_scale else TEXT_COLOR, multiline = True, width = 400,
                          font_name = "CMU Serif", font_size = 24)
