@@ -1,4 +1,4 @@
-from arcade import Sprite, SpriteList, Vec2
+from arcade import Sprite, SpriteList, Vec2, Texture, get_window
 from resources import load_png
 
 
@@ -7,13 +7,22 @@ class Bar:
         self._position = position
         self.back_tex = load_png(back) if back is not None else None
         self.middle_tex = load_png(middle)
+        self.middle_tex_crop = Texture.create_empty(f'{self.middle_tex.atlas_name}_cropped', self.middle_tex.size)
         self.front_tex = load_png(front) if front is not None else None
+
+        self.atlas = get_window().ctx.default_atlas
+
+        self.atlas.add(self.middle_tex)
+        self.atlas.add(self.middle_tex_crop)
+
+        self.middle_region = self.atlas.get_texture_region_info(self.middle_tex.atlas_name)
+        self.crop_region = self.atlas.get_texture_region_info(self.middle_tex_crop.atlas_name)
 
         self.spritelist = SpriteList[Sprite](capacity = 3)
         if self.back_tex:
             self.back_sprite = Sprite(self.back_tex)
             self.spritelist.append(self.back_sprite)
-        self.middle_sprite = Sprite(self.middle_tex)
+        self.middle_sprite = Sprite(self.middle_tex_crop)
         self.spritelist.append(self.middle_sprite)
         if self.front_tex:
             self.front_sprite = Sprite(self.front_tex)
@@ -40,6 +49,19 @@ class Bar:
         self._percentage = v
 
     def draw(self) -> None:
+        self.crop_region.x, self.crop_region.y = self.middle_region.x, self.middle_region.y
+        self.crop_region.height = self.middle_region.height
+        self.crop_region.width = self.percentage * self.middle_region.width
+
+        ux, uy, uw, uh = self.crop_region.x / self.atlas.width, self.crop_region.y / self.atlas.height, self.crop_region.width / self.atlas.width, self.crop_region.height / self.atlas.height
+        self.crop_region.texture_coordinates = (ux, uy, ux + uw, uy, ux, uy + uh, ux + uw, uy + uh)
+
+        slot = self.atlas._texture_uvs.get_existing_or_free_slot(self.middle_tex_crop.atlas_name)
+        self.atlas._texture_uvs.set_slot_data(slot, self.crop_region.texture_coordinates)
+
+        self.middle_sprite.width = self.crop_region.width
+        self.middle_sprite.left = self.position - self.middle_tex.width / 2.0
+
         self.spritelist.draw()
 
 
