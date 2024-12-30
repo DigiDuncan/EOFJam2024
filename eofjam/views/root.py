@@ -4,7 +4,7 @@ import arcade
 
 from eofjam.constants import BG_COLOR, DEBUG_COLOR, TEXT_COLOR
 from eofjam.core.application import View
-from eofjam.game.bar import HealthBar
+from eofjam.game.bar import EnergyBar, HealthBar
 from eofjam.game.entity import BulletSpawner, Enemy, Player
 from eofjam.core.world import World
 from eofjam.core.store import game
@@ -23,6 +23,7 @@ class RootView(View):
         self.world = World(self.player, self.camera, self.enemies)
 
         self.health_bar = HealthBar(self.window.rect.top_right - Vec2(5, 5))
+        self.energy_bar = EnergyBar(self.window.rect.top_right - Vec2(5, 30))
 
         for _ in range(50):
             p = (self.world.bounds).uv_to_position((random.random(), random.random()))
@@ -49,6 +50,7 @@ class RootView(View):
     def on_update(self, delta_time: float) -> None:
         self.world.update(delta_time)
         self.health_bar.percentage = (self.player.health / self.player.max_health)
+        self.energy_bar.percentage = (self.player.scale_energy / 2)
 
     def on_key_press(self, symbol, modifiers) -> None:  # noqa: ANN001
         match symbol:
@@ -109,6 +111,7 @@ class RootView(View):
         with self.camera.activate():
             self.world.draw()
         self.health_bar.draw()
+        self.energy_bar.draw()
         arcade.draw_text(f"{self.player.scale}x\nEnergy: {self.player.scale_energy:.3f}", 0, self.window.height, anchor_y = "top",
                          color = DEBUG_COLOR if game.run.unlimited_scale else TEXT_COLOR, multiline = True, width = 400,
                          font_name = "CMU Serif", font_size = 24)

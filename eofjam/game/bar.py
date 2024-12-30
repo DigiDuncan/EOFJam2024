@@ -7,6 +7,7 @@ class Bar:
         self._position = position
         self.back_tex = load_png(back) if back is not None else None
         self.middle_tex = load_png(middle)
+        print(self.middle_tex.atlas_name)
         self.middle_tex_crop = Texture.create_empty(f'{self.middle_tex.atlas_name}_cropped', self.middle_tex.size)
         self.front_tex = load_png(front) if front is not None else None
 
