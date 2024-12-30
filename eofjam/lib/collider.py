@@ -36,7 +36,7 @@ class CircleCollider(Collider):
     def collide(self, other: Collider) -> tuple[float, Vec2]:
         direction = other.direction(self.position)
         overlap = other.distance(self.position) - self.radius
-        
+
         return overlap, direction
 
     def distance(self, point: Vec2) -> float:

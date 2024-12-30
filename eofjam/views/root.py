@@ -106,4 +106,4 @@ class RootView(View):
             self.world.draw()
         arcade.draw_text(f"{self.player.scale}x\nEnergy: {self.player.scale_energy:.3f}", 0, self.window.height, anchor_y = "top",
                          color = DEBUG_COLOR if game.run.unlimited_scale else TEXT_COLOR, multiline = True, width = 400,
-                         font_name = "CMUNRM", font_size = 24)
+                         font_name = "CMU Serif", font_size = 24)

@@ -93,8 +93,8 @@ def load_png_sheet(name: str, sub_durectories: tuple[str, ...] = ()) -> SpriteSh
 # Sound Methods
 get_wav_path = make_path_finder(audio, 'wav')
 get_ogg_path = make_path_finder(audio, 'ogg')
-def load_wav(name: str, streaming: bool = False, sub_directories: tuple[str, ...] = ()) -> Sound: return _load_sound(get_wav_path(str, sub_directories), streaming)
-def load_ogg(name: str, streaming: bool = False, sub_directories: tuple[str, ...] = ()) -> Sound: return _load_sound(get_ogg_path(str, sub_directories), streaming)
+def load_wav(name: str, streaming: bool = False, sub_directories: tuple[str, ...] = ()) -> Sound: return _load_sound(get_wav_path(name, sub_directories), streaming)
+def load_ogg(name: str, streaming: bool = False, sub_directories: tuple[str, ...] = ()) -> Sound: return _load_sound(get_ogg_path(name, sub_directories), streaming)
 
 # Font Methods
 get_font_path = make_path_finder(fonts, 'ttf')
