@@ -7,17 +7,15 @@ class Bar:
         self._position = position
         self.back_tex = load_png(back) if back is not None else None
         self.middle_tex = load_png(middle)
-        print(self.middle_tex.atlas_name)
         self.middle_tex_crop = Texture.create_empty(f'{self.middle_tex.atlas_name}_cropped', self.middle_tex.size)
         self.front_tex = load_png(front) if front is not None else None
+
+        print(self.middle_tex.atlas_name, self.middle_tex_crop.atlas_name)
 
         self.atlas = get_window().ctx.default_atlas
 
         self.atlas.add(self.middle_tex)
         self.atlas.add(self.middle_tex_crop)
-
-        self.middle_region = self.atlas.get_texture_region_info(self.middle_tex.atlas_name)
-        self.crop_region = self.atlas.get_texture_region_info(self.middle_tex_crop.atlas_name)
 
         self.spritelist = SpriteList[Sprite](capacity = 3)
         if self.back_tex:
@@ -52,7 +50,13 @@ class Bar:
     def percentage(self, v: float) -> None:
         self._percentage = v
 
+    def pp(self):
+        self.atlas.save('asdjkhas.png', draw_borders=True)
+
     def draw(self) -> None:
+        self.middle_region = self.atlas.get_texture_region_info(self.middle_tex.atlas_name)
+        self.crop_region = self.atlas.get_texture_region_info(self.middle_tex_crop.atlas_name)
+
         self.crop_region.y = self.middle_region.y
         self.crop_region.height = self.middle_region.height
         self.crop_region.width = self.percentage * self.middle_region.width
