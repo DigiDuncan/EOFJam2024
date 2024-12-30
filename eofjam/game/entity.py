@@ -22,7 +22,9 @@ class Entity:
         self.rotation = rotation
         self.scale = scale
 
-        self.health: int = 1
+        self.max_health: int = 100
+
+        self.health: int = 100
         self.strength: float = 1
         self.defense: float = 1
         self._speed: float = 400

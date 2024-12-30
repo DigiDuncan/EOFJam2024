@@ -37,6 +37,7 @@ class Bar:
     @position.setter
     def position(self, v: Vec2) -> None:
         self._position = v
+        self._position -= Vec2(*self.middle_sprite.size)
         for s in self.spritelist:
             s.position = v
 
