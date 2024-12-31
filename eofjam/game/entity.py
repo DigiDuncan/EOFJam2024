@@ -29,12 +29,12 @@ class Entity:
         self.rotation = rotation
         self.scale = scale
 
-        self.max_health: int = 100
+        self.max_health: float = 100
 
-        self.health: int = 100
-        self.strength: float = 1
-        self.defense: float = 1
-        self._speed: float = 400
+        self.health: float = 100
+        self._strength: float = 1
+        self._defense: float = 1
+        self._speed: float = 400  # Entity speed is in wpx/s. (world-pixels per second)
         self.sprinting = False
         self.bullet_speed: float = 500
         self.last_damage_time = None
@@ -81,6 +81,22 @@ class Entity:
     @speed.setter
     def speed(self, v: float) -> None:
         self._speed = v
+
+    @property
+    def strength(self) -> float:
+        return self._strength * self.scale
+
+    @strength.setter
+    def strength(self, v: float) -> None:
+        self._strength = v
+
+    @property
+    def defense(self) -> float:
+        return self._defense * self.scale
+
+    @defense.setter
+    def defense(self, v: float) -> None:
+        self._defense = v
 
     def update(self, delta_time: float) -> None:
         if self.last_damage_time is not None:

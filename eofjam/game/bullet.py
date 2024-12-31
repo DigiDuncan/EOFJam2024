@@ -100,7 +100,7 @@ class BulletList:
             for b in self.bullets:
                 if b.hitbox.overlaps(e.hitbox) and e != b.owner:
                     b.dead = True
-                    e.health -= b.health_loss
+                    e.health -= (b.health_loss * b.scale) / e.defense
                     e.last_damage_time = arcade.clock.GLOBAL_CLOCK.time
                     if isinstance(e, Player):
                         e.energy -= b.energy_loss

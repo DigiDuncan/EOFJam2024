@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import math
 import arcade
 from arcade import Camera2D, Rect, SpriteList, Vec2, get_window

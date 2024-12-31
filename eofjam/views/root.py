@@ -86,9 +86,9 @@ class RootView(View):
                 self.world.scale = 1
             case arcade.key.NUM_MULTIPLY:
                 game.run.unlimited_scale = not game.run.unlimited_scale
-            case arcade.key.NUM_DIVIDE:
+            case arcade.key.B:
                 self.world.draw_bounds = not self.world.draw_bounds
-            case arcade.key.NUM_DECIMAL:
+            case arcade.key.E:
                 self.player.energy = 2.0
 
     def on_key_release(self, symbol, modifiers) -> None:  # noqa: ANN001
