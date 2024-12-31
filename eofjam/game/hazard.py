@@ -56,7 +56,7 @@ class Grill(Hazard):
     def interact(self, other: Entity) -> None:
         clock = arcade.clock.GLOBAL_CLOCK
         if isinstance(other, Player):
-            other.scale_energy = smerp(other.scale_energy, 0.0, self.speed, clock.delta_time)
+            other.energy = smerp(other.energy, 0.0, self.speed, clock.delta_time)
 
     def draw(self) -> None:
         self.background.texture.offset = (arcade.clock.GLOBAL_CLOCK.time * -100, 0)
@@ -72,7 +72,7 @@ class Charger(Hazard):
     def interact(self, other: Entity) -> None:
         clock = arcade.clock.GLOBAL_CLOCK
         if isinstance(other, Player):
-            other.scale_energy = smerp(other.scale_energy, max(self.charge_to, other.scale_energy), self.speed, clock.delta_time)
+            other.energy = smerp(other.energy, max(self.charge_to, other.energy), self.speed, clock.delta_time)
 
     def draw(self) -> None:
         draw_rect_filled(self.rect, CHARGER_COLOR)

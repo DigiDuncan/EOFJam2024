@@ -103,7 +103,7 @@ class BulletList:
                     e.health -= b.health_loss
                     e.last_damage_time = arcade.clock.GLOBAL_CLOCK.time
                     if isinstance(e, Player):
-                        e.scale_energy -= b.energy_loss
+                        e.energy -= b.energy_loss
 
     def draw(self) -> None:
         self.spritelist.draw()

@@ -6,12 +6,11 @@ from arcade.camera.grips import constrain_xy
 from eofjam.constants import DEBUG_COLOR
 from eofjam.game.bullet import BulletList
 from eofjam.game.hazard import Hazard
+from eofjam.lib.types import BASICALLY_ZERO
 from eofjam.lib.utils import clamp, smerp
 from eofjam.game.entity import Enemy, Entity, Player
 from eofjam.core.store import game
 from eofjam.lib.collider import Collider, InverseRectCollider
-
-REALLY_SMALL = 0.001
 
 class World:
     def __init__(self, player: Player, camera: Camera2D, enemies: list[Enemy] = None,
@@ -24,9 +23,10 @@ class World:
         self.enemies: list[Enemy] = [] if enemies is None else enemies
         self.hazards: list[Hazard] = [] if hazards is None else hazards
 
-        self.enemy_spritelist = SpriteList()
-        for e in enemies:
-            self.enemy_spritelist.append(e.sprite)
+        self.entity_spritelist = SpriteList()
+        for e in self.entities:
+            self.entity_spritelist.append(e.sprite)
+            self.entity_spritelist.append(e.flash_sprite)
         self.bullets: BulletList = BulletList(self)
 
         self._scale = 1
@@ -40,10 +40,11 @@ class World:
     def entities(self) -> list[Entity]:
         return [self.player, *self.enemies]
 
-    def refresh_enemies(self) -> None:
-        self.enemy_spritelist.clear()
-        for e in self.enemies:
-            self.enemy_spritelist.append(e.sprite)
+    def refresh_sprites(self) -> None:
+        self.entity_spritelist.clear()
+        for e in self.entities:
+            self.entity_spritelist.append(e.sprite)
+            self.entity_spritelist.append(e.flash_sprite)
 
     @property
     def scale(self) -> float:
@@ -73,16 +74,16 @@ class World:
             pass
         elif self.player.scaling_up:
             ds = self.player.scale_speed * delta_time
-            if ds > self.player.scale_energy:
-                ds = self.player.scale_energy
+            if ds > self.player.energy:
+                ds = self.player.energy
             self.scale += ds
-            self.player.scale_energy -= ds
+            self.player.energy -= ds
         elif self.player.scaling_down:
             ds = self.player.scale_speed * delta_time
-            if ds > self.player.scale_energy:
-                ds = self.player.scale_energy
+            if ds > self.player.energy:
+                ds = self.player.energy
             self.scale -= ds
-            self.player.scale_energy -= ds
+            self.player.energy -= ds
 
         # Handle world scaling
         self._scale = smerp(self._scale, self.target_scale, 10, delta_time)
@@ -156,12 +157,12 @@ class World:
         # Health
         rem = []
         for e in self.enemies:
-            if e.health <= REALLY_SMALL:
+            if e.health <= BASICALLY_ZERO:
                 rem.append(e)
         for e in rem:
             self.enemies.remove(e)
 
-        self.refresh_enemies()
+        self.refresh_sprites()
 
         # Camera
         self.camera.position = self.player.position
@@ -170,8 +171,7 @@ class World:
     def draw(self) -> None:
         for h in self.hazards:
             h.draw()
-        self.enemy_spritelist.draw()
-        self.player.draw()
+        self.entity_spritelist.draw()
         self.bullets.draw()
         if self.draw_bounds:
             arcade.draw_rect_outline(self.bounds, DEBUG_COLOR, border_width = max(1, int(self.scale * 4)))

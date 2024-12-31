@@ -5,6 +5,7 @@ import arcade
 from arcade import Sprite, SpriteCircle, Vec2
 import arcade.clock
 
+from eofjam.lib.types import BASICALLY_ZERO
 from eofjam.lib.utils import clamp
 
 if TYPE_CHECKING:
@@ -34,8 +35,9 @@ class Entity:
         self.strength: float = 1
         self.defense: float = 1
         self._speed: float = 400
+        self.sprinting = False
         self.bullet_speed: float = 500
-        self.last_damage_time = -math.inf
+        self.last_damage_time = None
 
         self.immobile = False
 
@@ -74,21 +76,19 @@ class Entity:
 
     @property
     def speed(self) -> float:
-        return self._speed / math.sqrt(self.scale)
+        return self._speed / math.sqrt(self.scale) * (1.5 if self.sprinting else 1.0)
 
     @speed.setter
     def speed(self, v: float) -> None:
         self._speed = v
 
-    def draw(self) -> None:
-        t = (arcade.clock.GLOBAL_CLOCK.time - self.last_damage_time) * 4
-        a = int(clamp(0, arcade.math.lerp(255, 0, t), 255))
-        arcade.draw_sprite(self.sprite)
-        if a != 0:
-            arcade.draw_sprite(self.flash_sprite, alpha = a)
-
     def update(self, delta_time: float) -> None:
-        ...
+        if self.last_damage_time is not None:
+            t = (arcade.clock.GLOBAL_CLOCK.time - self.last_damage_time) * 4
+            a = int(clamp(0, arcade.math.lerp(255, 0, t), 255))
+            self.flash_sprite.alpha = a
+        else:
+            self.flash_sprite.alpha = 0
 
 class Enemy(Entity):
     def __init__(self, position: Vec2, rotation: float = 0.0, scale: float = 1.0):
@@ -116,12 +116,20 @@ class Player(Entity):
         self.scaling_up = False
         self.scaling_down = False
 
-        self.scale_energy = 2.0
+        self.energy = 2.0
         self.scale_speed = 1.0
 
         self.fire_rate = 0.25
 
         self.speed = 600
+
+    @property
+    def speed(self) -> float:
+        return self._speed / math.sqrt(self.scale) * (1.5 if self.sprinting and self.energy > BASICALLY_ZERO else 1.0)
+
+    @speed.setter
+    def speed(self, v: float) -> None:
+        self._speed = v
 
     @property
     def scale(self) -> float:
@@ -134,8 +142,11 @@ class Player(Entity):
         self._scale = v
 
     def update(self, delta_time: float) -> None:
+        super().update(delta_time)
         direction = Vec2(self.right - self.left, self.up - self.down).normalize()
         self.velocity = direction * self.speed
+        if self.sprinting:
+            self.energy -= (delta_time / 2.5)
 
 class BulletSpawner(Entity):
     def __init__(self, bullet_list: BulletList, position: Vec2, rotation: float = 0.0, scale: float = 1, speed: float = 0.0, fire_rate: float = 0.25):
@@ -151,6 +162,7 @@ class BulletSpawner(Entity):
         self.bullet_timer = 0.0
 
     def update(self, delta_time: float) -> None:
+        super().update(delta_time)
         self.bullet_timer += delta_time
         if self.active:
             self.rotation += self.speed * delta_time

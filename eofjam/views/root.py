@@ -49,14 +49,14 @@ class RootView(View):
         self.enemies.append(spawner)
 
         self.world.enemies = self.enemies
-        self.world.refresh_enemies()
+        self.world.refresh_sprites()
         self.world.scale = 1
         self.world.draw_bounds = True
 
     def on_update(self, delta_time: float) -> None:
         self.world.update(delta_time)
         self.health_bar.percentage = (self.player.health / self.player.max_health)
-        self.energy_bar.percentage = (self.player.scale_energy / 2)
+        self.energy_bar.percentage = (self.player.energy / 2)
 
     def on_key_press(self, symbol, modifiers) -> None:  # noqa: ANN001
         match symbol:
@@ -72,6 +72,8 @@ class RootView(View):
                 self.player.down = True
             case arcade.key.D:
                 self.player.right = True
+            case arcade.key.LSHIFT:
+                self.player.sprinting = True
             case arcade.key.NUM_8:
                 self.player.fire_up = True
             case arcade.key.NUM_5:
@@ -87,7 +89,7 @@ class RootView(View):
             case arcade.key.NUM_DIVIDE:
                 self.world.draw_bounds = not self.world.draw_bounds
             case arcade.key.NUM_DECIMAL:
-                self.player.scale_energy = 2.0
+                self.player.energy = 2.0
 
     def on_key_release(self, symbol, modifiers) -> None:  # noqa: ANN001
         match symbol:
@@ -103,6 +105,8 @@ class RootView(View):
                 self.player.down = False
             case arcade.key.D:
                 self.player.right = False
+            case arcade.key.LSHIFT:
+                self.player.sprinting = False
             case arcade.key.NUM_8:
                 self.player.fire_up = False
             case arcade.key.NUM_5:
