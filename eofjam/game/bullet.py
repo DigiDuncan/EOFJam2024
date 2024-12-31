@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 
 import arcade
 from arcade import SpriteCircle, SpriteList, Vec2
+import arcade.clock
 
 from eofjam.constants import BULLET_NONE_COLOR, BULLET_HEALTH_COLOR, BULLET_ENERGY_COLOR, BULLET_BOTH_COLOR
 from eofjam.game.entity import Player
@@ -100,6 +101,7 @@ class BulletList:
                 if b.hitbox.overlaps(e.hitbox) and e != b.owner:
                     b.dead = True
                     e.health -= b.health_loss
+                    e.last_damage_time = arcade.clock.GLOBAL_CLOCK.time
                     if isinstance(e, Player):
                         e.scale_energy -= b.energy_loss
 

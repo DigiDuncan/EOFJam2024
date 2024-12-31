@@ -3,6 +3,9 @@ import math
 from typing import TYPE_CHECKING
 import arcade
 from arcade import Sprite, SpriteCircle, Vec2
+import arcade.clock
+
+from eofjam.lib.utils import clamp
 
 if TYPE_CHECKING:
     from eofjam.game.bullet import BulletList
@@ -17,6 +20,7 @@ class Entity:
         self._position: Vec2 = position
         self._rotation: float = rotation
         self.sprite: Sprite = sprite
+        self.flash_sprite = SpriteCircle(self.sprite.width / 2, arcade.color.WHITE)
         self._scale: float = scale
         self.velocity: Vec2 = Vec2()
 
@@ -31,6 +35,7 @@ class Entity:
         self.defense: float = 1
         self._speed: float = 400
         self.bullet_speed: float = 500
+        self.last_damage_time = -math.inf
 
         self.immobile = False
 
@@ -45,6 +50,7 @@ class Entity:
     @position.setter
     def position(self, v: Vec2) -> None:
         self.sprite.position = v
+        self.flash_sprite.position = v
         self._position = v
 
     @property
@@ -63,6 +69,7 @@ class Entity:
     @scale.setter
     def scale(self, v: float) -> None:
         self.sprite.scale = round(v / 4, 3)
+        self.flash_sprite.scale = round(v / 4, 3)
         self._scale = round(v, 3)
 
     @property
@@ -74,7 +81,11 @@ class Entity:
         self._speed = v
 
     def draw(self) -> None:
+        t = (arcade.clock.GLOBAL_CLOCK.time - self.last_damage_time) * 4
+        a = int(clamp(0, arcade.math.lerp(255, 0, t), 255))
         arcade.draw_sprite(self.sprite)
+        if a != 0:
+            arcade.draw_sprite(self.flash_sprite, alpha = a)
 
     def update(self, delta_time: float) -> None:
         ...
@@ -119,6 +130,7 @@ class Player(Entity):
     @scale.setter
     def scale(self, v: float) -> None:
         self.sprite.scale = v
+        self.flash_sprite.scale = v
         self._scale = v
 
     def update(self, delta_time: float) -> None:
