@@ -84,6 +84,9 @@ class Enemy(Entity):
         sprite = SpriteCircle(512, ENEMY_COLOR)
         super().__init__(position, sprite, rotation, scale)
 
+        self.max_health = 5
+        self.health = 5
+
 class Player(Entity):
     def __init__(self, position: Vec2, rotation: float = 0.0, scale: float = 1.0):
         sprite = SpriteCircle(128, PLAYER_COLOR)
@@ -106,6 +109,8 @@ class Player(Entity):
         self.scale_speed = 1.0
 
         self.fire_rate = 0.25
+
+        self.speed = 600
 
     @property
     def scale(self) -> float:

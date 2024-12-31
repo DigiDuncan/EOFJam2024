@@ -8,7 +8,7 @@ from eofjam.game.bar import EnergyBar, HealthBar
 from eofjam.game.entity import BulletSpawner, Enemy, Player
 from eofjam.core.world import World
 from eofjam.core.store import game
-from eofjam.game.hazard import Charger, Grill, Hazard
+from eofjam.game.hazard import Charger, Grill, Hazard, Healer, Laser
 
 
 class RootView(View):
@@ -38,6 +38,12 @@ class RootView(View):
 
         cr = XYWH(self.window.center_x + 4000, 2000, 800, 400)
         self.world.hazards.append(Charger(cr))
+
+        lr = XYWH(self.window.center_x + 2000, 4000, 800, 400)
+        self.world.hazards.append(Laser(lr))
+
+        hr = XYWH(self.window.center_x + 4000, 4000, 800, 400)
+        self.world.hazards.append(Healer(hr, 100))
 
         spawner = BulletSpawner(self.world.bullets, Vec2(self.window.center_x + 3000, 2000), speed = 90)
         self.enemies.append(spawner)

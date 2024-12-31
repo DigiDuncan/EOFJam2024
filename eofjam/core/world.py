@@ -11,6 +11,7 @@ from eofjam.game.entity import Enemy, Entity, Player
 from eofjam.core.store import game
 from eofjam.lib.collider import Collider, InverseRectCollider
 
+REALLY_SMALL = 0.001
 
 class World:
     def __init__(self, player: Player, camera: Camera2D, enemies: list[Enemy] = None,
@@ -155,7 +156,7 @@ class World:
         # Health
         rem = []
         for e in self.enemies:
-            if e.health <= 0:
+            if e.health <= REALLY_SMALL:
                 rem.append(e)
         for e in rem:
             self.enemies.remove(e)
