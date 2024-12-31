@@ -27,3 +27,8 @@ HAZARD_BOTH_COLOR = color.CYAN.replace(a = 64)
 CHARGER_COLOR = color.CG_BLUE
 SPAWNER_COLOR = color.SLATE_GRAY
 HEALER_COLOR = color.CG_RED
+
+PICKUP_HEALTH_COLOR = color.CG_RED.replace(a = 128)
+PICKUP_ENERGY_COLOR = color.CG_BLUE.replace(a = 128)
+PICKUP_BOTH_COLOR = color.ROYAL_PURPLE.replace(a = 128)
+PICKUP_NONE_COLOR = color.WHITE.replace(a = 128)
