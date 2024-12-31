@@ -23,7 +23,7 @@ HAZARD_MIN_SCALE_COLOR = color.YELLOW.replace(a = 64)
 HAZARD_MAX_SCALE_COLOR = color.MAGENTA.replace(a = 64)
 HAZARD_BOTH_COLOR = color.CYAN.replace(a = 64)
 
-# These will be sprites one day...
-CHARGER_COLOR = color.ELECTRIC_GREEN
+# These will be sprites one day...?
+CHARGER_COLOR = color.CG_BLUE
 SPAWNER_COLOR = color.SLATE_GRAY
 HEALER_COLOR = color.CG_RED
