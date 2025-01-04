@@ -161,8 +161,8 @@ class Player(Entity):
         super().update(delta_time)
         direction = Vec2(self.right - self.left, self.up - self.down).normalize()
         self.velocity = direction * self.speed
-        if self.sprinting:
-            self.energy -= (delta_time / 2.5)
+        if self.sprinting and abs(self.velocity.length()) > BASICALLY_ZERO:
+            self.energy = max(0, self.energy - (delta_time / 2.5))
 
 class BulletSpawner(Entity):
     def __init__(self, bullet_list: BulletList, position: Vec2, rotation: float = 0.0, scale: float = 1, speed: float = 0.0, fire_rate: float = 0.25):
