@@ -2,6 +2,7 @@ from collections.abc import Sequence
 import json
 from typing import Iterable
 from .filefactory import make_file_opener, make_path_finder, make_string_opener
+from .LDtk import parse_LDtk_file, LDtkRoot
 from arcade import (
     ArcadeContext,
     Sound,
@@ -36,7 +37,10 @@ __all__ = (
     'read_json',
     'open_json',
     'load_json',
-    'dump_json'
+    'dump_json',
+    'get_LDtk_path'
+    'load_LDtk'
+    'LDtkRoot',
 )
 
 # Shader methods
@@ -107,3 +111,7 @@ def load_json(name: str, sub_directories: tuple[str, ...] = ()) -> dict: return 
 def dump_json(name: str, data: dict, sub_directoreis: tuple[str, ...] = ()) -> None:
     with open_json(name, sub_directoreis, 'w') as fp:
         json.dump(data, fp)
+
+# LDtk methods
+get_LDtk_path = make_path_finder(data, 'ldtk')
+def load_LDtk(name: str, sub_directories: tuple[str, ...] = ()) -> LDtkRoot: return parse_LDtk_file(get_LDtk_path(name, sub_directories))

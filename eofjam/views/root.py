@@ -2,6 +2,8 @@ import random
 from arcade import XYWH, Camera2D, Vec2
 import arcade
 
+from resources import load_LDtk
+
 from eofjam.constants import BG_COLOR, DEBUG_COLOR, TEXT_COLOR
 from eofjam.core.application import View
 from eofjam.game.bar import EnergyBar, HealthBar
@@ -20,46 +22,49 @@ class RootView(View):
         self.camera = Camera2D()
         self.enemies = []
 
-        self.world = World(self.player, self.camera, self.enemies)
+        self.world = World(self.player, self.camera, load_LDtk('world'))
+        self.world.load_world()
+        self.world.draw_bounds = True
+
+        # Temp call here
+        self.world.load_level('Level_0')
 
         self.health_bar = HealthBar(self.window.rect.top_right - Vec2(5, 5))
         self.energy_bar = EnergyBar(self.window.rect.top_right - Vec2(5, 30))
 
-        for _ in range(50):
-            p = (self.world.bounds).uv_to_position((random.random(), random.random()))
-            e = Enemy(p)
-            self.enemies.append(e)
+        # for _ in range(50):
+        #     p = (self.world.bounds).uv_to_position((random.random(), random.random()))
+        #     e = Enemy(p)
+        #     self.enemies.append(e)
 
-        r = XYWH(self.window.center_x, 2000, 800, 400)
-        self.world.hazards.append(Hazard(r, max_scale = 1.0))
+        # r = XYWH(self.window.center_x, 2000, 800, 400)
+        # self.world.hazards.append(Hazard(r, max_scale = 1.0))
 
-        gr = XYWH(self.window.center_x + 2000, 2000, 800, 400)
-        self.world.hazards.append(Grill(gr))
-
-        cr = XYWH(self.window.center_x + 4000, 2000, 800, 400)
-        self.world.hazards.append(Charger(cr))
-
-        lr = XYWH(self.window.center_x + 2000, 4000, 800, 400)
-        self.world.hazards.append(Laser(lr))
-
-        hr = XYWH(self.window.center_x + 4000, 4000, 800, 400)
-        self.world.hazards.append(Healer(hr, 100))
-
-        phr = XYWH(self.window.center_x + 2000, 3000, 128, 128)
-        self.world.hazards.append(Pickup(phr, health = 25))
-
-        pbr = XYWH(self.window.center_x + 3000, 3000, 128, 128)
-        self.world.hazards.append(Pickup(pbr, health = 25, energy = 1.0))
-
-        per = XYWH(self.window.center_x + 4000, 3000, 128, 128)
-        self.world.hazards.append(Pickup(per, energy = 1.0))
-
-        spawner = BulletSpawner(self.world.bullets, Vec2(self.window.center_x + 3000, 2000), speed = 90)
-        self.enemies.append(spawner)
-
-        self.world.enemies = self.enemies
-        self.world.refresh_sprites()
-        self.world.scale = 1
+        # gr = XYWH(self.window.center_x + 2000, 2000, 800, 400)
+        # self.world.hazards.append(Grill(gr))
+ 
+        # cr = XYWH(self.window.center_x + 4000, 2000, 800, 400)
+        # self.world.hazards.append(Charger(cr))
+ 
+        # lr = XYWH(self.window.center_x + 2000, 4000, 800, 400)
+        # self.world.hazards.append(Laser(lr))
+ 
+        # hr = XYWH(self.window.center_x + 4000, 4000, 800, 400)
+        # self.world.hazards.append(Healer(hr, 100))
+ 
+        # phr = XYWH(self.window.center_x + 2000, 3000, 128, 128)
+        # self.world.hazards.append(Pickup(phr, health = 25))
+ 
+        # pbr = XYWH(self.window.center_x + 3000, 3000, 128, 128)
+        # self.world.hazards.append(Pickup(pbr, health = 25, energy = 1.0))
+ 
+        # per = XYWH(self.window.center_x + 4000, 3000, 128, 128)
+        # self.world.hazards.append(Pickup(per, energy = 1.0))
+ 
+        # spawner = BulletSpawner(self.world.bullets, Vec2(self.window.center_x + 3000, 2000), speed = 90)
+        # self.enemies.append(spawner)
+ 
+        # self.world.enemies = self.enemies
         self.world.draw_bounds = True
 
     def on_update(self, delta_time: float) -> None:

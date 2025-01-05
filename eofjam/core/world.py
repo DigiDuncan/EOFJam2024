@@ -5,6 +5,9 @@ import arcade
 from arcade import Camera2D, Rect, SpriteList, Vec2, get_window
 from arcade.camera.grips import constrain_xy
 
+from resources import LDtk, load_png_sheet
+from pathlib import Path
+
 from eofjam.constants import DEBUG_COLOR
 from eofjam.game.bullet import BulletList
 from eofjam.game.hazard import Hazard
@@ -12,18 +15,52 @@ from eofjam.lib.types import BASICALLY_ZERO
 from eofjam.lib.utils import clamp, smerp
 from eofjam.game.entity import Enemy, Entity, Player
 from eofjam.core.store import game
-from eofjam.lib.collider import Collider, InverseRectCollider
+from eofjam.lib.collider import Collider, InverseRectCollider, RectCollider
+
+class TileSet:
+
+    def __init__(self, data: LDtk.TilesetDefintion, atlas: arcade.texture_atlas.TextureAtlasBase = None):
+        self.atlas = atlas or get_window().ctx.default_atlas
+        self.data = data
+        self.tiles: list[arcade.Texture] = []
+        self.tile_data: dict[int, str] = {custom.tile_id: custom.data for custom in data.custom_data}
+
+        # Assumed img is in `resources/images`
+        set_name = Path(data.rel_path).stem
+        self.sheet = load_png_sheet(set_name)
+
+        for row in range(data.c_height):
+            for col in range(data.c_width):
+                x = data.padding + col * (data.tile_grid_size + data.spacing)
+                y = data.padding + row * (data.tile_grid_size + data.spacing)
+                tex = self.sheet.get_texture(x, y, data.tile_grid_size, data.tile_grid_size)
+                self.tiles.append(tex)
+                self.atlas.add(tex)
+
+    @property
+    def tile_size(self) -> int:
+        return self.data.tile_grid_size
+
+    def __getitem__(self, idx: int):
+        return self.tiles[idx]
+    
+    def get_data(self, idx: int):
+        return self.tile_data[idx]
+
 
 class World:
-    def __init__(self, player: Player, camera: Camera2D, enemies: list[Enemy] = None,
-                 hazards: list[Hazard] = None):
+    def __init__(self, player: Player, camera: Camera2D, data: LDtk.LDtkRoot):
+        self.world_data: LDtk.LDtkRoot = data
+        self.levels: dict[str, LDtk.Level] = {}
+        self.tilesets: dict[str, TileSet] = {}
         self.player: Player = player
         self.camera: Camera2D = camera
         self.bounds: Rect = get_window().rect * 8
 
         self.terrain: list[Collider] = [InverseRectCollider(self.bounds)]
-        self.enemies: list[Enemy] = [] if enemies is None else enemies
-        self.hazards: list[Hazard] = [] if hazards is None else hazards
+        self.tiles: SpriteList = None
+        self.enemies: list[Enemy] = []
+        self.hazards: list[Hazard] = []
 
         self.entity_spritelist = SpriteList()
         for e in self.entities:
@@ -37,6 +74,49 @@ class World:
         self.bullet_timer = 0.0
 
         self.draw_bounds = False
+    
+    def load_world(self):
+        self.levels = {level.identifier: level for level in self.world_data.levels}
+        for tileset in self.world_data.defs.tilesets:
+            self.tilesets[tileset.uid] = TileSet(tileset)
+
+        self.tiles = SpriteList(False, capacity=2048)
+
+    def load_level(self, level_name: str):
+        # Check if the level name even exists
+        if level_name not in self.levels:
+            print('Failed to load level ignoring command')
+            return
+
+        # Get the LDtk level data
+        level = self.levels[level_name]
+        # Extract the layers by name for easy access later. 
+        # If a level doesn't use a layer it won't show up so maybe do some checks
+        layers = {layer.identifier: layer for layer in level.layer_instances}
+
+        # Get the px bounds and add the inverse collider
+        self.bounds = arcade.LBWH(0, 0, level.px_width*4, level.px_height*4)
+        self.terrain = [InverseRectCollider(self.bounds)]
+
+        # Get every wall entity. Has a little check to make sure its only walls
+        for wall in layers['Walls'].entity_instances:
+            if wall.identifier != 'Wall':
+                print(f'entitiy {wall.identifier} on wrong layer')
+                continue
+            self.terrain.append(RectCollider(arcade.LBWH(wall.px_x*4, (level.px_height - wall.px_y - wall.height)*4, wall.width*4, wall.height*4)))
+
+        # Clear the tiles sprites and add new ones.
+        # A layer can only use one tileset so we grab it then the LDtk tile_id gives us the texture.
+        self.tiles.clear()
+        tile_set = self.tilesets[layers['Tiles'].tileset_def_uid]
+        tile_size = tile_set.tile_size * 4
+        for tile in layers['Tiles'].grid_tiles:
+            self.tiles.append(arcade.Sprite(tile_set[tile.tile_id], 4, tile.pos_x*4 + tile_size / 2, (level.px_height - tile.pos_y)*4 - tile_size / 2))
+
+
+        # Update the entity spritelists
+        self.refresh_sprites()
+        self.scale = 1
 
     @property
     def entities(self) -> list[Entity]:
@@ -171,9 +251,12 @@ class World:
         self.camera.position = constrain_xy(self.camera.view_data, self.bounds)
 
     def draw(self) -> None:
+        self.tiles.draw()
         for h in self.hazards:
             h.draw()
         self.entity_spritelist.draw()
         self.bullets.draw()
         if self.draw_bounds:
-            arcade.draw_rect_outline(self.bounds, DEBUG_COLOR, border_width = max(1, int(self.scale * 4)))
+            for collider in self.terrain:
+                collider.draw()
+            # arcade.draw_rect_outline(self.bounds, DEBUG_COLOR, border_width = max(1, int(self.scale * 4)))

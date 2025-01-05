@@ -498,7 +498,7 @@ def _parse_LDtk_layer(data: dict[str, Any]) -> Layer:
         data['__pxTotalOffsetY'],
         data['__tilesetDefUid'],
         data['__tilesetRelPath'],
-        data['__type'],
+        LayerType(data['__type']),
         [Tile(tile['a'], tile['f'], *tile['px'], *tile['src'], tile['t']) for tile in data['autoLayerTiles']],
         [_parse_LDtk_entity(entity) for entity in data['entityInstances']],
         [Tile(tile['a'], tile['f'], *tile['px'], *tile['src'], tile['t']) for tile in data['gridTiles']],
