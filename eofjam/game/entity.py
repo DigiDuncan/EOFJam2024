@@ -7,6 +7,7 @@ import arcade.clock
 
 from eofjam.lib.types import BASICALLY_ZERO
 from eofjam.lib.utils import clamp
+from resources import load_png, load_png_sheet
 
 if TYPE_CHECKING:
     from eofjam.game.bullet import BulletList

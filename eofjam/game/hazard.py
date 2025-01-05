@@ -1,13 +1,13 @@
 import arcade
 import arcade.clock
-from arcade import Rect, draw_rect_filled, draw_rect_outline, draw_text
+from arcade import Rect, Sprite, draw_rect_filled, draw_rect_outline, draw_text
 from arcade.future.background import Background
 
 from eofjam.constants import HAZARD_MIN_SCALE_COLOR, HAZARD_MAX_SCALE_COLOR, HAZARD_BOTH_COLOR, CHARGER_COLOR, PICKUP_BOTH_COLOR, PICKUP_ENERGY_COLOR, PICKUP_HEALTH_COLOR, PICKUP_NONE_COLOR, TEXT_COLOR, HEALER_COLOR
 from eofjam.game.entity import Entity, Player
 from eofjam.lib.collider import RectCollider
 from eofjam.lib.utils import smerp
-from resources import get_png_path
+from resources import get_png_path, load_png_sheet
 
 
 class Hazard:
@@ -160,3 +160,43 @@ class Pickup(Hazard):
         draw_rect_filled(self.rect, color)
         draw_rect_outline(self.rect, color.replace(a = 255), 3)
         draw_text(f"+{self.health}H\n+{self.energy}E", self.rect.left + 5, self.rect.top + 5, TEXT_COLOR, anchor_y = "top", font_size = 24, font_name = "CMU Serif", multiline = True, width = 128)
+
+class Door(Hazard):
+    def __init__(self, rect: Rect):
+        # Pickups don't care about mix/max size.
+        super().__init__(rect)
+        self.open = False
+
+        tex = load_png_sheet("textures").get_texture(1536, 0, 64, 64)
+        self.sprite = Sprite(tex)
+        self.sprite.position = self.rect.bottom_left
+
+    def passable(self, scale: float) -> bool:
+        return scale <= 1.0 and self.open
+
+    def draw(self) -> None:
+        return arcade.draw_sprite(self.sprite)
+
+class Button(Hazard):
+    def __init__(self, rect: Rect, target: Door):
+        # Pickups don't care about mix/max size.
+        super().__init__(rect)
+        self.target = target
+
+        tex = load_png_sheet("textures").get_texture(1536, 0, 64, 64)
+        self.sprite = Sprite(tex)
+        self.sprite.position = self.rect.bottom_left
+
+        self.last_pushed = None
+
+    def interact(self, other: Entity) -> None:
+        time = arcade.clock.GLOBAL_CLOCK.time
+        if self.last_pushed is None or self.last_pushed + 1 < time:
+            self.target.open = not self.target.open
+            self.last_pushed = time
+
+    def passable(self, scale: float) -> bool:
+        return scale <= 1.0 and self.open
+
+    def draw(self) -> None:
+        return arcade.draw_sprite(self.sprite)
