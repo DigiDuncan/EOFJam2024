@@ -4,7 +4,7 @@ from arcade.types import Color
 OFF_WHITE = Color.from_gray(int(255*0.9))
 OFF_BLACK = Color.from_gray(int(255*0.1))
 
-BG_COLOR = OFF_WHITE
+BG_COLOR = OFF_BLACK
 BORDER_COLOR = OFF_BLACK
 TEXT_COLOR = OFF_BLACK
 

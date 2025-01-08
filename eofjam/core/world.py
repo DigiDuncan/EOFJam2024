@@ -10,12 +10,15 @@ from pathlib import Path
 
 from eofjam.constants import DEBUG_COLOR
 from eofjam.game.bullet import BulletList
-from eofjam.game.hazard import Hazard
+from eofjam.game.hazard import Grill, Hazard
 from eofjam.lib.types import BASICALLY_ZERO
 from eofjam.lib.utils import clamp, smerp
 from eofjam.game.entity import Enemy, Entity, Player
 from eofjam.core.store import game
 from eofjam.lib.collider import Collider, InverseRectCollider, RectCollider
+
+WORLD_SCALE_MIN = (math.log2(0.1) + 2) / 2
+WORLD_SCALE_MAX = (math.log2(10) + 2) / 2
 
 class TileSet:
 
@@ -43,8 +46,8 @@ class TileSet:
 
     def __getitem__(self, idx: int):
         return self.tiles[idx]
-    
-    def get_data(self, idx: int):
+
+    def get_data(self, idx: int) -> str:
         return self.tile_data[idx]
 
 
@@ -74,15 +77,15 @@ class World:
         self.bullet_timer = 0.0
 
         self.draw_bounds = False
-    
-    def load_world(self):
+
+    def load_world(self) -> None:
         self.levels = {level.identifier: level for level in self.world_data.levels}
         for tileset in self.world_data.defs.tilesets:
             self.tilesets[tileset.uid] = TileSet(tileset)
 
         self.tiles = SpriteList(False, capacity=2048)
 
-    def load_level(self, level_name: str):
+    def load_level(self, level_name: str) -> None:
         # Check if the level name even exists
         if level_name not in self.levels:
             print('Failed to load level ignoring command')
@@ -101,9 +104,18 @@ class World:
         # Get every wall entity. Has a little check to make sure its only walls
         for wall in layers['Walls'].entity_instances:
             if wall.identifier != 'Wall':
-                print(f'entitiy {wall.identifier} on wrong layer')
+                print(f'Entitiy {wall.identifier} on wrong layer!')
                 continue
             self.terrain.append(RectCollider(arcade.LBWH(wall.px_x*4, (level.px_height - wall.px_y - wall.height)*4, wall.width*4, wall.height*4)))
+
+        for entity in layers['Entities'].entity_instances:
+            match entity.identifier:
+                # Get every enemy
+                case "Enemy":
+                    self.enemies.append(Enemy(Vec2(entity.px_x, level.px_height - entity.px_y) * 4, 0, entity.width / 64))
+                # Grills
+                case "Grill":
+                    self.hazards.append(Grill(arcade.LBWH(entity.px_x*4, (level.px_height - entity.px_y - entity.height)*4, entity.width*4, entity.height*4)))
 
         # Clear the tiles sprites and add new ones.
         # A layer can only use one tileset so we grab it then the LDtk tile_id gives us the texture.
@@ -112,7 +124,6 @@ class World:
         tile_size = tile_set.tile_size * 4
         for tile in layers['Tiles'].grid_tiles:
             self.tiles.append(arcade.Sprite(tile_set[tile.tile_id], 4, tile.pos_x*4 + tile_size / 2, (level.px_height - tile.pos_y)*4 - tile_size / 2))
-
 
         # Update the entity spritelists
         self.refresh_sprites()
@@ -135,7 +146,7 @@ class World:
     @scale.setter
     def scale(self, v: float) -> None:
         if game.run.unlimited_scale:
-            self.target_scale = round(v, 3)
+            self.target_scale = round(clamp(WORLD_SCALE_MIN, v, WORLD_SCALE_MAX), 3)
         else:
             self.target_scale = round(clamp(0, v, 2), 3)
 
@@ -251,7 +262,7 @@ class World:
         self.camera.position = constrain_xy(self.camera.view_data, self.bounds)
 
     def draw(self) -> None:
-        self.tiles.draw()
+        self.tiles.draw(pixelated = True)
         for h in self.hazards:
             h.draw()
         self.entity_spritelist.draw()

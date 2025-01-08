@@ -7,7 +7,6 @@ import arcade.clock
 
 from eofjam.lib.types import BASICALLY_ZERO
 from eofjam.lib.utils import clamp
-from resources import load_png, load_png_sheet
 
 if TYPE_CHECKING:
     from eofjam.game.bullet import BulletList
@@ -16,6 +15,7 @@ from eofjam.constants import ENEMY_COLOR, PLAYER_COLOR, SPAWNER_COLOR
 from eofjam.lib.collider import CircleCollider
 
 TAU_THREE_SIXTYTHS = math.tau / 360
+
 
 class Entity:
     def __init__(self, position: Vec2, sprite: Sprite, rotation: float = 0.0, scale: float = 1.0):
