@@ -8,12 +8,11 @@ from arcade.camera.grips import constrain_xy
 from resources import LDtk, load_png_sheet
 from pathlib import Path
 
-from eofjam.constants import DEBUG_COLOR
 from eofjam.game.bullet import BulletList
-from eofjam.game.hazard import Grill, Hazard
+from eofjam.game.hazard import Exit, Grill, Hazard, Laser
 from eofjam.lib.types import BASICALLY_ZERO
 from eofjam.lib.utils import clamp, smerp
-from eofjam.game.entity import Enemy, Entity, Player
+from eofjam.game.entity import BulletSpawner, Enemy, Entity, Player
 from eofjam.core.store import game
 from eofjam.lib.collider import Collider, InverseRectCollider, RectCollider
 
@@ -66,9 +65,6 @@ class World:
         self.hazards: list[Hazard] = []
 
         self.entity_spritelist = SpriteList()
-        for e in self.entities:
-            self.entity_spritelist.append(e.sprite)
-            self.entity_spritelist.append(e.flash_sprite)
         self.bullets: BulletList = BulletList(self)
 
         self._scale = 1
@@ -77,6 +73,8 @@ class World:
         self.bullet_timer = 0.0
 
         self.draw_bounds = False
+
+        self.current_level = None
 
     def load_world(self) -> None:
         self.levels = {level.identifier: level for level in self.world_data.levels}
@@ -88,12 +86,12 @@ class World:
     def load_level(self, level_name: str) -> None:
         # Check if the level name even exists
         if level_name not in self.levels:
-            print('Failed to load level ignoring command')
+            print('Failed to load level, ignoring command!')
             return
 
         # Get the LDtk level data
         level = self.levels[level_name]
-        # Extract the layers by name for easy access later. 
+        # Extract the layers by name for easy access later.
         # If a level doesn't use a layer it won't show up so maybe do some checks
         layers = {layer.identifier: layer for layer in level.layer_instances}
 
@@ -101,21 +99,42 @@ class World:
         self.bounds = arcade.LBWH(0, 0, level.px_width*4, level.px_height*4)
         self.terrain = [InverseRectCollider(self.bounds)]
 
+        # Reset hazards and enemies
+        self.hazards = []
+        self.enemies = []
+
         # Get every wall entity. Has a little check to make sure its only walls
         for wall in layers['Walls'].entity_instances:
             if wall.identifier != 'Wall':
-                print(f'Entitiy {wall.identifier} on wrong layer!')
+                print(f'Entity {wall.identifier} on wrong layer!')
                 continue
             self.terrain.append(RectCollider(arcade.LBWH(wall.px_x*4, (level.px_height - wall.px_y - wall.height)*4, wall.width*4, wall.height*4)))
 
-        for entity in layers['Entities'].entity_instances:
+        for entity in layers['Static'].entity_instances:
+            fields = {}
+            for f in entity.field_instances:
+                fields[f.identifer] = f.value
             match entity.identifier:
-                # Get every enemy
-                case "Enemy":
-                    self.enemies.append(Enemy(Vec2(entity.px_x, level.px_height - entity.px_y) * 4, 0, entity.width / 64))
+                # Spawnpoint
+                case "Spawnpoint":
+                    self.player.position = Vec2(entity.px_x, level.px_height - entity.px_y) * 4
+                # Exit
+                case "Exit":
+                    self.hazards.append(Exit(Vec2(entity.px_x, level.px_height - entity.px_y) * 4, fields["level_name"]))
                 # Grills
                 case "Grill":
                     self.hazards.append(Grill(arcade.LBWH(entity.px_x*4, (level.px_height - entity.px_y - entity.height)*4, entity.width*4, entity.height*4)))
+                # Lasers
+                case "Laser":
+                    self.hazards.append(Laser(arcade.LBWH(entity.px_x*4, (level.px_height - entity.px_y - entity.height)*4, entity.width*4, entity.height*4)))
+                case "BulletSpawner":
+                    self.enemies.append(BulletSpawner(self.bullets, Vec2(entity.px_x, level.px_height - entity.px_y) * 4, 0, entity.width / 64, fields["speed"], fields["fire_rate"]))
+
+        for entity in layers['Dynamic'].entity_instances:
+            match entity.identifier:
+            # Get every enemy
+                case "Enemy":
+                    self.enemies.append(Enemy(Vec2(entity.px_x, level.px_height - entity.px_y) * 4, 0, entity.width / 64))
 
         # Clear the tiles sprites and add new ones.
         # A layer can only use one tileset so we grab it then the LDtk tile_id gives us the texture.
@@ -128,6 +147,7 @@ class World:
         # Update the entity spritelists
         self.refresh_sprites()
         self.scale = 1
+        self.current_level = level_name
 
     @property
     def entities(self) -> list[Entity]:
@@ -260,6 +280,17 @@ class World:
         # Camera
         self.camera.position = self.player.position
         self.camera.position = constrain_xy(self.camera.view_data, self.bounds)
+
+        # Handle warping
+        if self.player.wants_to_leave:
+            self.load_level(self.player.wants_to_leave)
+            self.player.wants_to_leave = None
+
+        # Handle dying
+        if self.player.health <= 0.0:
+            self.load_level(self.current_level)
+            self.player.health = self.player.max_health
+            self.player.scale = 1.0
 
     def draw(self) -> None:
         self.tiles.draw(pixelated = True)

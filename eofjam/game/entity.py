@@ -140,6 +140,8 @@ class Player(Entity):
 
         self.speed = 600
 
+        self.wants_to_leave = None
+
     @property
     def speed(self) -> float:
         return self._speed / math.sqrt(self.scale) * (1.5 if self.sprinting and self.energy > BASICALLY_ZERO else 1.0)

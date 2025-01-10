@@ -1,11 +1,12 @@
 import arcade
 import arcade.clock
-from arcade import Rect, Sprite, draw_rect_filled, draw_rect_outline, draw_text
+from arcade import XYWH, Rect, Sprite, Vec2, draw_rect_filled, draw_rect_outline, draw_text
 from arcade.future.background import Background
 
 from eofjam.constants import HAZARD_MIN_SCALE_COLOR, HAZARD_MAX_SCALE_COLOR, HAZARD_BOTH_COLOR, CHARGER_COLOR, PICKUP_BOTH_COLOR, PICKUP_ENERGY_COLOR, PICKUP_HEALTH_COLOR, PICKUP_NONE_COLOR, TEXT_COLOR, HEALER_COLOR
 from eofjam.game.entity import Entity, Player
 from eofjam.lib.collider import RectCollider
+from eofjam.lib.draw import draw_cross
 from eofjam.lib.utils import smerp
 from resources import get_png_path, load_png_sheet
 
@@ -200,3 +201,16 @@ class Button(Hazard):
 
     def draw(self) -> None:
         return arcade.draw_sprite(self.sprite)
+
+class Exit(Hazard):
+    def __init__(self, pos: Vec2, level: str):
+        rect = XYWH(pos.x, pos.y, 64, 64)
+        super().__init__(rect)
+        self.level = level
+
+    def interact(self, other: Entity) -> None:
+        if isinstance(other, Player):
+            other.wants_to_leave = self.level
+
+    def draw(self) -> None:
+        return draw_cross(self.rect.center, 64, arcade.color.ORANGE, 12)
