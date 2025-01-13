@@ -96,14 +96,17 @@ class BulletList:
             self.spritelist.remove(b.sprite)
 
     def check_collisions(self) -> None:
-        for e in [self.world.player, *self.world.enemies]:
-            for b in self.bullets:
+        for b in self.bullets:
+            for e in [self.world.player, *self.world.enemies]:
                 if b.hitbox.overlaps(e.hitbox) and e != b.owner:
                     b.dead = True
                     e.health -= (b.health_loss * b.scale) / e.defense
                     e.last_damage_time = arcade.clock.GLOBAL_CLOCK.time
                     if isinstance(e, Player):
                         e.energy -= b.energy_loss
+            for t in self.world.terrain:
+                if t.overlaps(b.hitbox):
+                    b.dead = True
 
     def draw(self) -> None:
         self.spritelist.draw()
