@@ -290,6 +290,7 @@ class World:
         if self.player.health <= 0.0:
             self.load_level(self.current_level)
             self.player.health = self.player.max_health
+            self.player.energy = 2.0
             self.player.scale = 1.0
 
     def draw(self) -> None:
