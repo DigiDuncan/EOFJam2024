@@ -99,6 +99,7 @@ ignore = [
     "RUF001",
     "RUF013",
     "PTH123",
-    "C401"
+    "C401",
+    "T201"  # print is fine for this project for now
 ]
 
