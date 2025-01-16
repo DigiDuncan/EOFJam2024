@@ -9,6 +9,9 @@ import arcade
 class Collider(Protocol):
     position: Vec2
 
+    def contains(self, point: Vec2) -> bool:
+        ...
+
     def overlaps(self, other: Collider) -> bool:
         ...
 
@@ -29,6 +32,9 @@ class CircleCollider(Collider):
     def __init__(self, position: Vec2, radius: float):
         self.position = position
         self.radius = radius
+
+    def contains(self, point):
+        return (self.position - point).length_squared <= self.radius**2
 
     def overlaps(self, other: Collider) -> bool:
         return other.distance(self.position) - self.radius <= 0.0
@@ -53,6 +59,9 @@ class RectCollider(Collider):
 
     def __init__(self, rect: Rect):
         self.rect: Rect = rect
+
+    def contains(self, point):
+        return self.rect.point_in_rect(point)
 
     @property
     def position(self):
@@ -111,6 +120,9 @@ class InverseRectCollider(Collider):
     @property
     def position(self):
         return self.rect.center
+    
+    def contains(self, point):
+        return not self.rect.point_in_rect(point)
 
     def overlaps(self, other: Collider):
         diff = (self.position - other.position).length()

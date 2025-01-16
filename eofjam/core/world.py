@@ -15,6 +15,7 @@ from eofjam.lib.types import BASICALLY_ZERO
 from eofjam.lib.utils import clamp, smerp
 from eofjam.game.entity import BulletSpawner, Enemy, Entity, Player
 from eofjam.core.store import game
+from eofjam.core.navigation import NavGrid
 from eofjam.lib.collider import Collider, InverseRectCollider, RectCollider
 
 WORLD_SCALE_MIN = (math.log2(0.1) + 2) / 2
@@ -49,7 +50,7 @@ class TileSet:
 
     def get_data(self, idx: int) -> str:
         return self.tile_data[idx]
-
+    
 
 class World:
     def __init__(self, player: Player, camera: Camera2D, data: LDtk.LDtkRoot):
@@ -59,6 +60,8 @@ class World:
         self.player: Player = player
         self.camera: Camera2D = camera
         self.bounds: Rect = get_window().rect * 8
+
+        self.navigation: NavGrid = None
 
         self.terrain: list[Collider] = [InverseRectCollider(self.bounds)]
         self.tiles: SpriteList = None
@@ -163,6 +166,17 @@ class World:
         tile_size = tile_set.tile_size * 4
         for tile in layers['Tiles'].grid_tiles:
             self.tiles.append(arcade.Sprite(tile_set[tile.tile_id], 4, tile.pos_x*4 + tile_size / 2, (level.px_height - tile.pos_y)*4 - tile_size / 2))
+
+        del self.navigation
+        self.navigation = NavGrid(layers["Tiles"].c_width, layers["Tiles"].c_height, tile_size, tile_size)
+
+        hs = tile_size / 2.0
+        for node in self.navigation.nodes_flat:
+            location = Vec2(node.location[0] * tile_size + hs, node.location[1] * tile_size + hs)
+            for terrain in self.terrain:
+                if terrain.contains(location):
+                    node.clear()
+                    break
 
         # Update the entity spritelists
         self.refresh_sprites()
