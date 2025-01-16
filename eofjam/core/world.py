@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+from typing import Any
 import arcade
 from arcade import Camera2D, Rect, SpriteList, Vec2, get_window
 from arcade.camera.grips import constrain_xy
@@ -9,7 +10,7 @@ from resources import LDtk, load_png_sheet
 from pathlib import Path
 
 from eofjam.game.bullet import BulletList
-from eofjam.game.hazard import Exit, Grill, Hazard, Laser
+from eofjam.game.hazard import Button, Door, Exit, Grill, Hazard, Laser
 from eofjam.lib.types import BASICALLY_ZERO
 from eofjam.lib.utils import clamp, smerp
 from eofjam.game.entity import BulletSpawner, Enemy, Entity, Player
@@ -76,6 +77,13 @@ class World:
 
         self.current_level = None
 
+    def get_entity_from_id(self, iid: str) -> Any:  # noqa: ANN401
+        for e in self.entities + self.hazards:
+            if hasattr(e, "uuid"):
+                if e.uuid == iid:
+                    return e
+        return None
+
     def load_world(self) -> None:
         self.levels = {level.identifier: level for level in self.world_data.levels}
         for tileset in self.world_data.defs.tilesets:
@@ -110,25 +118,48 @@ class World:
                 continue
             self.terrain.append(RectCollider(arcade.LBWH(wall.px_x*4, (level.px_height - wall.px_y - wall.height)*4, wall.width*4, wall.height*4)))
 
+        # Pass 1
         for entity in layers['Static'].entity_instances:
             fields = {}
             for f in entity.field_instances:
                 fields[f.identifer] = f.value
+
+            # Common stats
+            pos = Vec2(entity.px_x, level.px_height - entity.px_y) * 4
+            rect = arcade.LBWH(entity.px_x*4, (level.px_height - entity.px_y - entity.height)*4, entity.width*4, entity.height*4)
+            scale = entity.width / 64
+
             match entity.identifier:
-                # Spawnpoint
                 case "Spawnpoint":
-                    self.player.position = Vec2(entity.px_x, level.px_height - entity.px_y) * 4
-                # Exit
+                    self.player.position = pos
                 case "Exit":
-                    self.hazards.append(Exit(Vec2(entity.px_x, level.px_height - entity.px_y) * 4, fields["level_name"]))
-                # Grills
+                    self.hazards.append(Exit(pos, fields["level_name"]))
                 case "Grill":
-                    self.hazards.append(Grill(arcade.LBWH(entity.px_x*4, (level.px_height - entity.px_y - entity.height)*4, entity.width*4, entity.height*4)))
-                # Lasers
+                    self.hazards.append(Grill(rect))
                 case "Laser":
-                    self.hazards.append(Laser(arcade.LBWH(entity.px_x*4, (level.px_height - entity.px_y - entity.height)*4, entity.width*4, entity.height*4)))
+                    self.hazards.append(Laser(rect))
+                case "Door":
+                    print(entity.iid)
+                    self.hazards.append(Door(rect, entity.iid))
                 case "BulletSpawner":
-                    self.enemies.append(BulletSpawner(self.bullets, Vec2(entity.px_x, level.px_height - entity.px_y) * 4, 0, entity.width / 64, fields["speed"], fields["fire_rate"]))
+                    self.enemies.append(BulletSpawner(self.bullets, pos, 0, scale, fields["speed"], fields["fire_rate"]))
+
+        # Pass 2
+        # We have to do this pass seperately because we need entities from Pass 1 to be referenced
+        for entity in layers['Static'].entity_instances:
+            fields = {}
+            for f in entity.field_instances:
+                fields[f.identifer] = f.value
+
+            # Common stats
+            pos = Vec2(entity.px_x, level.px_height - entity.px_y) * 4
+            rect = arcade.LBWH(entity.px_x*4, (level.px_height - entity.px_y - entity.height)*4, entity.width*4, entity.height*4)
+            scale = entity.width / 64
+
+            match entity.identifier:
+                case "Button":
+                    target = fields["Target"].entity_iid
+                    self.hazards.append(Button(rect, self.get_entity_from_id(target)))
 
         for entity in layers['Dynamic'].entity_instances:
             match entity.identifier:
@@ -302,4 +333,6 @@ class World:
         if self.draw_bounds:
             for collider in self.terrain:
                 collider.draw()
+            for hazard in self.hazards:
+                arcade.draw_rect_outline(hazard.rect, arcade.color.GREEN, 4)
             # arcade.draw_rect_outline(self.bounds, DEBUG_COLOR, border_width = max(1, int(self.scale * 4)))

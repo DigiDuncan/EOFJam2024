@@ -1,6 +1,7 @@
 import arcade
 import arcade.clock
 from arcade import XYWH, Rect, Sprite, Vec2, draw_rect_filled, draw_rect_outline, draw_text
+from arcade.types import AnchorPoint
 from arcade.future.background import Background
 
 from eofjam.constants import HAZARD_MIN_SCALE_COLOR, HAZARD_MAX_SCALE_COLOR, HAZARD_BOTH_COLOR, CHARGER_COLOR, PICKUP_BOTH_COLOR, PICKUP_ENERGY_COLOR, PICKUP_HEALTH_COLOR, PICKUP_NONE_COLOR, TEXT_COLOR, HEALER_COLOR
@@ -163,20 +164,25 @@ class Pickup(Hazard):
         draw_text(f"+{self.health}H\n+{self.energy}E", self.rect.left + 5, self.rect.top + 5, TEXT_COLOR, anchor_y = "top", font_size = 24, font_name = "CMU Serif", multiline = True, width = 128)
 
 class Door(Hazard):
-    def __init__(self, rect: Rect):
+    def __init__(self, rect: Rect, uuid: str):
         # Pickups don't care about mix/max size.
         super().__init__(rect)
         self.open = False
+        self.uuid = uuid
 
         tex = load_png_sheet("textures").get_texture(1536, 0, 64, 64)
         self.sprite = Sprite(tex)
-        self.sprite.position = self.rect.bottom_left
+        self.sprite.scale = 4
+        self.sprite.position = self.rect.center
+
+        self.rect = self.rect.resize(height = 64, anchor = AnchorPoint.TOP_CENTER)
 
     def passable(self, scale: float) -> bool:
         return scale <= 1.0 and self.open
 
     def draw(self) -> None:
-        return arcade.draw_sprite(self.sprite)
+        if not self.open:
+            arcade.draw_sprite(self.sprite)
 
 class Button(Hazard):
     def __init__(self, rect: Rect, target: Door):
@@ -184,9 +190,12 @@ class Button(Hazard):
         super().__init__(rect)
         self.target = target
 
-        tex = load_png_sheet("textures").get_texture(1536, 0, 64, 64)
+        tex = load_png_sheet("textures").get_texture(1472, 0, 64, 64)
         self.sprite = Sprite(tex)
-        self.sprite.position = self.rect.bottom_left
+        self.sprite.scale = 4
+        self.sprite.position = self.rect.center
+
+        self.rect = self.rect.resize(height = 64, anchor = AnchorPoint.TOP_CENTER)
 
         self.last_pushed = None
 
@@ -195,9 +204,6 @@ class Button(Hazard):
         if self.last_pushed is None or self.last_pushed + 1 < time:
             self.target.open = not self.target.open
             self.last_pushed = time
-
-    def passable(self, scale: float) -> bool:
-        return scale <= 1.0 and self.open
 
     def draw(self) -> None:
         return arcade.draw_sprite(self.sprite)
