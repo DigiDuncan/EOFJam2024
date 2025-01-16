@@ -119,6 +119,7 @@ class World:
             self.terrain.append(RectCollider(arcade.LBWH(wall.px_x*4, (level.px_height - wall.px_y - wall.height)*4, wall.width*4, wall.height*4)))
 
         # Pass 1
+        button_data = []
         for entity in layers['Static'].entity_instances:
             fields = {}
             for f in entity.field_instances:
@@ -143,23 +144,11 @@ class World:
                     self.hazards.append(Door(rect, entity.iid))
                 case "BulletSpawner":
                     self.enemies.append(BulletSpawner(self.bullets, pos, 0, scale, fields["speed"], fields["fire_rate"]))
-
-        # Pass 2
-        # We have to do this pass seperately because we need entities from Pass 1 to be referenced
-        for entity in layers['Static'].entity_instances:
-            fields = {}
-            for f in entity.field_instances:
-                fields[f.identifer] = f.value
-
-            # Common stats
-            pos = Vec2(entity.px_x, level.px_height - entity.px_y) * 4
-            rect = arcade.LBWH(entity.px_x*4, (level.px_height - entity.px_y - entity.height)*4, entity.width*4, entity.height*4)
-            scale = entity.width / 64
-
-            match entity.identifier:
                 case "Button":
-                    target = fields["Target"].entity_iid
-                    self.hazards.append(Button(rect, self.get_entity_from_id(target)))
+                    button_data.append((rect, fields["Target"].entity_iid))
+
+        for rect, target in button_data:
+            self.hazards.append(Button(rect, self.get_entity_from_id(target)))
 
         for entity in layers['Dynamic'].entity_instances:
             match entity.identifier:

@@ -185,7 +185,7 @@ class Door(Hazard):
             arcade.draw_sprite(self.sprite)
 
 class Button(Hazard):
-    def __init__(self, rect: Rect, target: Door):
+    def __init__(self, rect: Rect, target: Door = None):
         # Pickups don't care about mix/max size.
         super().__init__(rect)
         self.target = target
