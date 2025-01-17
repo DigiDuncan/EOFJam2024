@@ -18,7 +18,8 @@ TAU_THREE_SIXTYTHS = math.tau / 360
 
 
 class Entity:
-    def __init__(self, position: Vec2, sprite: Sprite, rotation: float = 0.0, scale: float = 1.0):
+    def __init__(self, uuid: str, position: Vec2, sprite: Sprite, rotation: float = 0.0, scale: float = 1.0):
+        self.uuid: str = uuid
         self._position: Vec2 = position
         self._rotation: float = rotation
         self.sprite: Sprite = sprite
@@ -107,18 +108,21 @@ class Entity:
         else:
             self.flash_sprite.alpha = 0
 
+    def __hash__(self) -> str:
+        return self.uuid
+
 class Enemy(Entity):
-    def __init__(self, position: Vec2, rotation: float = 0.0, scale: float = 1.0):
+    def __init__(self, uuid: str ,position: Vec2, rotation: float = 0.0, scale: float = 1.0):
         sprite = SpriteCircle(512, ENEMY_COLOR)
-        super().__init__(position, sprite, rotation, scale)
+        super().__init__(uuid, position, sprite, rotation, scale)
 
         self.max_health = 5
         self.health = 5
 
 class Player(Entity):
-    def __init__(self, position: Vec2, rotation: float = 0.0, scale: float = 1.0):
+    def __init__(self, uuid: str, position: Vec2, rotation: float = 0.0, scale: float = 1.0):
         sprite = SpriteCircle(128, PLAYER_COLOR)
-        super().__init__(position, sprite, rotation, scale)
+        super().__init__(uuid, position, sprite, rotation, scale)
 
         self.up = False
         self.down = False
@@ -168,9 +172,9 @@ class Player(Entity):
             self.energy = max(0, self.energy - (delta_time / 2.5))
 
 class BulletSpawner(Entity):
-    def __init__(self, bullet_list: BulletList, position: Vec2, rotation: float = 0.0, scale: float = 1, speed: float = 0.0, fire_rate: float = 0.25):
+    def __init__(self, uuid: str, bullet_list: BulletList, position: Vec2, rotation: float = 0.0, scale: float = 1, speed: float = 0.0, fire_rate: float = 0.25):
         sprite = SpriteCircle(256, SPAWNER_COLOR)
-        super().__init__(position, sprite, rotation, scale)
+        super().__init__(uuid, position, sprite, rotation, scale)
 
         self.bullet_list = bullet_list
         self.speed = speed

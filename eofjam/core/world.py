@@ -50,7 +50,6 @@ class TileSet:
 
     def get_data(self, idx: int) -> str:
         return self.tile_data[idx]
-    
 
 class World:
     def __init__(self, player: Player, camera: Camera2D, data: LDtk.LDtkRoot):
@@ -79,6 +78,8 @@ class World:
         self.draw_bounds = False
 
         self.current_level = None
+
+        self.current_collisions: list[Hazard] = []
 
     def get_entity_from_id(self, iid: str) -> Any:  # noqa: ANN401
         for e in self.entities + self.hazards:
@@ -129,6 +130,7 @@ class World:
                 fields[f.identifer] = f.value
 
             # Common stats
+            uuid = entity.iid
             pos = Vec2(entity.px_x, level.px_height - entity.px_y) * 4
             rect = arcade.LBWH(entity.px_x*4, (level.px_height - entity.px_y - entity.height)*4, entity.width*4, entity.height*4)
             scale = entity.width / 64
@@ -137,27 +139,27 @@ class World:
                 case "Spawnpoint":
                     self.player.position = pos
                 case "Exit":
-                    self.hazards.append(Exit(pos, fields["level_name"]))
+                    self.hazards.append(Exit(uuid, pos, fields["level_name"]))
                 case "Grill":
-                    self.hazards.append(Grill(rect))
+                    self.hazards.append(Grill(uuid, rect))
                 case "Laser":
-                    self.hazards.append(Laser(rect))
+                    self.hazards.append(Laser(uuid, rect))
                 case "Door":
                     print(entity.iid)
-                    self.hazards.append(Door(rect, entity.iid))
+                    self.hazards.append(Door(uuid, rect))
                 case "BulletSpawner":
-                    self.enemies.append(BulletSpawner(self.bullets, pos, 0, scale, fields["speed"], fields["fire_rate"]))
+                    self.enemies.append(BulletSpawner(uuid, self.bullets, pos, 0, scale, fields["speed"], fields["fire_rate"]))
                 case "Button":
-                    button_data.append((rect, fields["Target"].entity_iid))
+                    button_data.append((uuid, rect, fields["Target"].entity_iid))
 
-        for rect, target in button_data:
-            self.hazards.append(Button(rect, self.get_entity_from_id(target)))
+        for uuid, rect, target in button_data:
+            self.hazards.append(Button(uuid, rect, self.get_entity_from_id(target)))
 
         for entity in layers['Dynamic'].entity_instances:
             match entity.identifier:
             # Get every enemy
                 case "Enemy":
-                    self.enemies.append(Enemy(Vec2(entity.px_x, level.px_height - entity.px_y) * 4, 0, entity.width / 64))
+                    self.enemies.append(Enemy(uuid, Vec2(entity.px_x, level.px_height - entity.px_y) * 4, 0, entity.width / 64))
 
         # Clear the tiles sprites and add new ones.
         # A layer can only use one tileset so we grab it then the LDtk tile_id gives us the texture.
@@ -300,6 +302,18 @@ class World:
                         overlap, normal = collider.collide(hazard_c)
                         entity.position += abs(overlap) * normal
                     hazard.interact(entity)
+                    if (entity, hazard) not in self.current_collisions:
+                        hazard.enter(entity)
+                        self.current_collisions.append((entity, hazard))
+
+            # purge entities from collisions
+            rem_c = []
+            for _, hazard in [(e, h) for e, h in self.current_collisions if e == entity]:
+                if not collider.overlaps(hazard.hitbox):
+                    rem_c.append(hazard)
+            for hazard in rem_c:
+                hazard.exit(entity)
+                self.current_collisions.remove((entity, hazard))
 
         # Health
         rem = []

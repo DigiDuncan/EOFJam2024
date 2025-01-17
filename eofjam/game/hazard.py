@@ -13,7 +13,8 @@ from resources import get_png_path, load_png_sheet
 
 
 class Hazard:
-    def __init__(self, rect: Rect, min_scale: float | None = None, max_scale: float | None = None):
+    def __init__(self, uuid: str, rect: Rect, min_scale: float | None = None, max_scale: float | None = None):
+        self.uuid = uuid
         self.rect = rect
         self.min_scale = min_scale
         self.max_scale = max_scale
@@ -31,7 +32,15 @@ class Hazard:
             return False
         return True
 
+    def enter(self, other: Entity) -> None:
+        # This is a stub.
+        ...
+
     def interact(self, other: Entity) -> None:
+        # This is a stub.
+        ...
+
+    def exit(self, other: Entity) -> None:
         # This is a stub.
         ...
 
@@ -48,14 +57,17 @@ class Hazard:
             draw_rect_filled(self.rect, HAZARD_MAX_SCALE_COLOR)
             draw_text(f"{self.max_scale}x", self.rect.left + 5, self.rect.top + 5, TEXT_COLOR, anchor_y = "top", font_size = 24, font_name = "CMU Serif")
 
+    def __hash__(self) -> str:
+        return self.uuid
+
 
 # For the below hazards, their "speeds" are it's half-life in 1/x seconds.
 
 
 class Grill(Hazard):
-    def __init__(self, rect: Rect, speed: float = 10):
+    def __init__(self, uuid: str, rect: Rect, speed: float = 10):
         # Grills don't care about mix/max size.
-        super().__init__(rect)
+        super().__init__(uuid, rect)
         self.speed = speed
         self.background = Background.from_file(get_png_path("grill"), self.rect.bottom_left, self.rect.size)
 
@@ -73,9 +85,9 @@ class Grill(Hazard):
         self.background.draw()
 
 class Charger(Hazard):
-    def __init__(self, rect: Rect,charge_to: float = 2.0, speed: float = 10):
+    def __init__(self, uuid: str, rect: Rect,charge_to: float = 2.0, speed: float = 10):
         # Chargers don't care about mix/max size.
-        super().__init__(rect)
+        super().__init__(uuid, rect)
         self.charge_to = charge_to
         self.speed = speed
 
@@ -93,9 +105,9 @@ class Charger(Hazard):
         draw_text(f"{self.charge_to}E", self.rect.left + 5, self.rect.top + 5, TEXT_COLOR, anchor_y = "top", font_size = 24, font_name = "CMU Serif")
 
 class Laser(Hazard):
-    def __init__(self, rect: Rect, speed: float = 10):
+    def __init__(self, uuid: str, rect: Rect, speed: float = 10):
         # Lasers don't care about mix/max size.
-        super().__init__(rect)
+        super().__init__(uuid, rect)
         self.speed = speed
         self.background = Background.from_file(get_png_path("laser"), self.rect.bottom_left, self.rect.size)
 
@@ -115,9 +127,9 @@ class Laser(Hazard):
         self.background.draw()
 
 class Healer(Hazard):
-    def __init__(self, rect: Rect, charge_to: float, speed: float = 10):
+    def __init__(self, uuid: str, rect: Rect, charge_to: float, speed: float = 10):
         # Healers don't care about mix/max size.
-        super().__init__(rect)
+        super().__init__(uuid, rect)
         self.charge_to = charge_to
         self.speed = speed
 
@@ -134,9 +146,9 @@ class Healer(Hazard):
         draw_text(f"{self.charge_to}H", self.rect.left + 5, self.rect.top + 5, TEXT_COLOR, anchor_y = "top", font_size = 24, font_name = "CMU Serif")
 
 class Pickup(Hazard):
-    def __init__(self, rect: Rect, *, health: float = 0, energy: float = 0):
+    def __init__(self, uuid: str, rect: Rect, *, health: float = 0, energy: float = 0):
         # Pickups don't care about mix/max size.
-        super().__init__(rect)
+        super().__init__(uuid, rect)
 
         self.health = health
         self.energy = energy
@@ -164,11 +176,10 @@ class Pickup(Hazard):
         draw_text(f"+{self.health}H\n+{self.energy}E", self.rect.left + 5, self.rect.top + 5, TEXT_COLOR, anchor_y = "top", font_size = 24, font_name = "CMU Serif", multiline = True, width = 128)
 
 class Door(Hazard):
-    def __init__(self, rect: Rect, uuid: str):
+    def __init__(self, uuid: str, rect: Rect):
         # Pickups don't care about mix/max size.
-        super().__init__(rect)
-        self.open = False
-        self.uuid = uuid
+        super().__init__(uuid, rect)
+        self.active = False
 
         tex = load_png_sheet("textures").get_texture(1536, 0, 64, 64)
         self.sprite = Sprite(tex)
@@ -178,16 +189,16 @@ class Door(Hazard):
         self.rect = self.rect.resize(height = 64, anchor = AnchorPoint.TOP_CENTER)
 
     def passable(self, scale: float) -> bool:
-        return scale <= 1.0 and self.open
+        return scale <= 1.0 and self.active
 
     def draw(self) -> None:
-        if not self.open:
+        if not self.active:
             arcade.draw_sprite(self.sprite)
 
 class Button(Hazard):
-    def __init__(self, rect: Rect, target: Door = None):
+    def __init__(self, uuid: str, rect: Rect, target: Door = None):
         # Pickups don't care about mix/max size.
-        super().__init__(rect)
+        super().__init__(uuid, rect)
         self.target = target
 
         tex = load_png_sheet("textures").get_texture(1472, 0, 64, 64)
@@ -199,19 +210,16 @@ class Button(Hazard):
 
         self.last_pushed = None
 
-    def interact(self, other: Entity) -> None:
-        time = arcade.clock.GLOBAL_CLOCK.time
-        if self.last_pushed is None or self.last_pushed + 1 < time:
-            self.target.open = not self.target.open
-            self.last_pushed = time
+    def enter(self, other: Entity) -> None:
+        self.target.active = not self.target.active
 
     def draw(self) -> None:
         return arcade.draw_sprite(self.sprite)
 
 class Exit(Hazard):
-    def __init__(self, pos: Vec2, level: str):
+    def __init__(self, uuid: str,pos: Vec2, level: str):
         rect = XYWH(pos.x, pos.y, 64, 64)
-        super().__init__(rect)
+        super().__init__(uuid, rect)
         self.level = level
 
     def interact(self, other: Entity) -> None:
