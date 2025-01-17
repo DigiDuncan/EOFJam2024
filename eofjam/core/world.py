@@ -94,6 +94,7 @@ class World:
             self.tilesets[tileset.uid] = TileSet(tileset)
 
         self.tiles = SpriteList(False, capacity=2048)
+        self.scale = 1
 
     def load_level(self, level_name: str) -> None:
         # Check if the level name even exists
@@ -182,7 +183,6 @@ class World:
 
         # Update the entity spritelists
         self.refresh_sprites()
-        self.scale = 1
         self.current_level = level_name
 
     @property
@@ -335,7 +335,7 @@ class World:
             self.player.wants_to_leave = None
 
         # Handle dying
-        if self.player.health <= 0.0:
+        if self.player.health <= BASICALLY_ZERO:
             self.load_level(self.current_level)
             self.player.health = self.player.max_health
             self.player.energy = 2.0
