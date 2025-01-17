@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+from queue import PriorityQueue
+
+import arcade
+
 class NavNode:
     
     def __init__(self, location: tuple[int, int]):
@@ -21,13 +25,21 @@ class NavNode:
     def clear(self):
         for link in self.links[:]:
             self.unlink(link)
-
-    def __del__(self):
-        for link in self.links:
-            self.unlink(link)
-
+    
     def __hash__(self):
         return hash(self.location)
+    
+    def __str__(self):
+        return f"<{self.location[0]},{self.location[1]}>"
+
+    def __repr__(self):
+        return f"Node{self.location}[{','.join(str(n) for n in self.links)}]"
+    
+    def __eq__(self, value):
+        return self.location == value.location
+    
+    def __lt__(self, value):
+        return self.location < value.location
 
 
 class NavGrid:
@@ -55,15 +67,64 @@ class NavGrid:
         self.pixel_height = pixel_height
 
     def get_node(self, location: tuple[float, float]) -> NavNode:
-        x = int(round(location / self.pixel_width))
-        y = int(round(location / self.pixel_height))
+        x = int(round(location[0] / self.pixel_width - 0.5))
+        y = int(round(location[1] / self.pixel_height - 0.5))
         return self.nodes[x][y]
 
-    def get_path(self, source: tuple[float, float], target: tuple[float, float]):
-        pass
+    def get_path(self, source: tuple[float, float], target: tuple[float, float]) -> list[NavNode]:
+        start = self.get_node(source)
+        end = self.get_node(target)
+
+        if not (start.links and end.links):
+            # One or both nodes can't be reached ever so don't waste time
+            return []
+
+        frontier: PriorityQueue[tuple[int, NavNode]] = PriorityQueue()
+        frontier.put((0, start))
+
+        checked = set()
+        checked.add(start)
+        
+        came_from: dict[NavNode, NavNode] = { start: None }
+        cost_to: dict[NavNode, int] = { start: 0 }
+
+        while not frontier.empty():
+            _, current = frontier.get()
+
+            if current == end:
+                break
+
+            for link in current.links:
+                new_cost = cost_to[current] + 1
+                if link not in cost_to or new_cost < cost_to[link]:
+                    cost_to[link] = new_cost
+                    priority = new_cost + (abs(current.location[0] - end.location[0]) + abs(current.location[1] - end.location[1])) # A* hueristic for better search speed
+                    frontier.put((priority, link))
+                    came_from[link] = current
+    
+        to = end
+        path = [to]
+        while to != start:
+            to = came_from[to]
+            path.append(to)
+        return path[::-1] # reverse it because we started at the end and worked backward
 
     def clear(self):
         for node in self.nodes_flat:
             node.clear()
         self.nodes_flat = []
         self.nodes = []
+
+    def draw(self):
+        w, h = self.pixel_width, self.pixel_height
+        h_w = w / 2.0
+        h_h = h / 2.0
+
+        linked = [(p.location[0] * w + h_w, p.location[1] * h + h_h) for p in self.nodes_flat if len(p.links) == 4]
+        sewi = [(p.location[0] * w + h_w, p.location[1] * h + h_h) for p in self.nodes_flat if 0 < len(p.links) < 4]
+        alone = [(p.location[0] * w + h_w, p.location[1] * h + h_h) for p in self.nodes_flat if len(p.links) == 0]
+
+        arcade.draw_points(linked, arcade.color.RAZZLE_DAZZLE_ROSE, 20)
+        arcade.draw_points(sewi, arcade.color.BLUE_GREEN, 20)
+        arcade.draw_points(alone, arcade.color.ORANGE, 20)
+

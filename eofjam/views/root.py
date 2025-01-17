@@ -30,6 +30,10 @@ class RootView(View):
         self.health_bar = HealthBar(self.window.rect.top_right - Vec2(5, 5))
         self.energy_bar = EnergyBar(self.window.rect.top_right - Vec2(5, 30))
 
+
+        # Temp Debug
+        self.test_path = []
+
     def on_update(self, delta_time: float) -> None:
         self.world.update(delta_time)
         self.health_bar.percentage = (self.player.health / self.player.max_health)
@@ -97,8 +101,24 @@ class RootView(View):
         self.clear(BG_COLOR)
         with self.camera.activate():
             self.world.draw()
+
+            if self.test_path:
+                s = self.world.navigation.pixel_width 
+                hs = s / 2.0
+                arcade.draw_line_strip([(n.location[0] * s + hs, n.location[1] * s + hs) for n in self.test_path], arcade.color.AFRICAN_VIOLET, 5)
+
         self.health_bar.draw()
         self.energy_bar.draw()
         arcade.draw_text(f"{self.player.scale}x", 0, self.window.height, anchor_y = "top",
                          color = DEBUG_COLOR if game.run.unlimited_scale else TEXT_COLOR, multiline = True, width = 400,
                          font_name = "CMU Serif", font_size = 24)
+        
+       
+
+    def on_mouse_motion(self, x, y, dx, dy):
+        px, py, _ = self.camera.unproject((x, y))
+        if self.world.bounds.point_in_rect((px, py)):
+            self.test_path = self.world.navigation.get_path(self.player.position, (px, py))
+            print(self.test_path)
+
+        

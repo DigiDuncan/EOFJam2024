@@ -1,5 +1,6 @@
 from eofjam.core.application import Window
 from eofjam.views.root import RootView
+from eofjam.views.collision_test import CollisionView
 
 from resources import load_font
 

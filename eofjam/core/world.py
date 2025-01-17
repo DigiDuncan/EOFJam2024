@@ -173,13 +173,27 @@ class World:
         del self.navigation
         self.navigation = NavGrid(layers["Tiles"].c_width, layers["Tiles"].c_height, tile_size, tile_size)
 
-        hs = tile_size / 2.0
+        s = tile_size
+        hs = s / 2.0
         for node in self.navigation.nodes_flat:
-            location = Vec2(node.location[0] * tile_size + hs, node.location[1] * tile_size + hs)
-            for terrain in self.terrain:
-                if terrain.contains(location):
-                    node.clear()
-                    break
+            location = Vec2(node.location[0] * s + hs, node.location[1] * s + hs)
+            for link in node.links[:]:
+                location_2 = Vec2(link.location[0] * s + hs, link.location[1] * s + hs)
+                if location.x == location_2.x:
+                    if location.y < location_2.y:
+                        r = RectCollider(arcade.LRBT(location.x - 2, location.x + 2, location.y, location_2.y))
+                    else:
+                        r = RectCollider(arcade.LRBT(location.x - 2, location.x + 2, location_2.y, location.y))
+                else:
+                    if location.x < location_2.x:
+                        r = RectCollider(arcade.LRBT(location.x, location_2.x, location.y-2, location.y+2))
+                    else:
+                        r = RectCollider(arcade.LRBT(location_2.x, location.x, location.y-2, location.y+2))
+                
+                for terrain in self.terrain:
+                    if terrain.overlaps(r):
+                        node.unlink(link)
+                        break
 
         # Update the entity spritelists
         self.refresh_sprites()
@@ -353,3 +367,5 @@ class World:
             for hazard in self.hazards:
                 arcade.draw_rect_outline(hazard.rect, arcade.color.GREEN, 4)
             # arcade.draw_rect_outline(self.bounds, DEBUG_COLOR, border_width = max(1, int(self.scale * 4)))
+
+        self.navigation.draw()
