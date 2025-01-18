@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 from eofjam.constants import ENEMY_COLOR, PLAYER_COLOR, SPAWNER_COLOR
 from eofjam.lib.collider import CircleCollider
 
-TAU_THREE_SIXTYTHS = math.tau / 360
+TAU_THREE_SIXTYTHS = math.tau / 360 # :<
 
 
 class Entity:
