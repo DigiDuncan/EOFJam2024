@@ -6,7 +6,7 @@ from resources import load_font
 
 def main() -> None:
     win = Window()
-    root = CollisionView() # RootView()
+    root = RootView() # RootView()
 
     for font in ["CMUNBX", "CMUNRM", "CMUNTI"]:
         load_font(font)

@@ -112,13 +112,9 @@ class RootView(View):
         arcade.draw_text(f"{self.player.scale}x", 0, self.window.height, anchor_y = "top",
                          color = DEBUG_COLOR if game.run.unlimited_scale else TEXT_COLOR, multiline = True, width = 400,
                          font_name = "CMU Serif", font_size = 24)
-        
-       
 
-    def on_mouse_motion(self, x, y, dx, dy):
+    def on_mouse_motion(self, x: float, y: float, dx: float, dy: float) -> None:
         px, py, _ = self.camera.unproject((x, y))
         if self.world.bounds.point_in_rect((px, py)):
             self.test_path = self.world.navigation.get_path(self.player.position, (px, py))
-            print(self.test_path)
-
-        
+            # print(self.test_path)

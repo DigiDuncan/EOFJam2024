@@ -368,4 +368,4 @@ class World:
                 arcade.draw_rect_outline(hazard.rect, arcade.color.GREEN, 4)
             # arcade.draw_rect_outline(self.bounds, DEBUG_COLOR, border_width = max(1, int(self.scale * 4)))
 
-        self.navigation.draw()
+        # self.navigation.draw()
